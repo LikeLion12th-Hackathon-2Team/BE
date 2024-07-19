@@ -1,17 +1,34 @@
 package org.example.lionhackaton.domain;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import org.example.lionhackaton.domain.oauth.OAuthProvider;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
+@NoArgsConstructor
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(hidden = true)
-    private Long id;
-    private String userId;
-    private String password;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	private String nickname;
+
+	@Enumerated(EnumType.STRING)
+	private OAuthProvider oAuthProvider;
+
+	@Builder
+	public User(String nickname, OAuthProvider oAuthProvider) {
+		this.nickname = nickname;
+		this.oAuthProvider = oAuthProvider;
+	}
 }
