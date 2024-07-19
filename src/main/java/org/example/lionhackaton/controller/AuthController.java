@@ -4,6 +4,7 @@ import org.example.lionhackaton.domain.User;
 import org.example.lionhackaton.domain.oauth.AuthTokens;
 import org.example.lionhackaton.domain.oauth.JwtTokenProvider;
 import org.example.lionhackaton.domain.oauth.KakaoLoginParams;
+import org.example.lionhackaton.domain.oauth.NaverLoginParams;
 import org.example.lionhackaton.service.OAuthLoginService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,5 +34,10 @@ public class AuthController {
 		String userId = jwtTokenProvider.extractSubject(jwtToken);
 		User info = oAuthLoginService.getInfo(Long.valueOf(userId));
 		return ResponseEntity.ok(info);
+	}
+
+	@PostMapping("/naver")
+	public ResponseEntity<AuthTokens> loginNaver(@RequestBody NaverLoginParams params) {
+		return ResponseEntity.ok(oAuthLoginService.login(params));
 	}
 }

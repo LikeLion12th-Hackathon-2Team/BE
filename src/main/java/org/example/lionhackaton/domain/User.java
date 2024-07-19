@@ -21,13 +21,15 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	private String email;
 	private String nickname;
 
 	@Enumerated(EnumType.STRING)
 	private OAuthProvider oAuthProvider;
 
 	@Builder
-	public User(String nickname, OAuthProvider oAuthProvider) {
+	public User(String email, String nickname, OAuthProvider oAuthProvider) {
+		this.email = email;
 		this.nickname = nickname;
 		this.oAuthProvider = oAuthProvider;
 	}
