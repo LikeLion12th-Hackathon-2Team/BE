@@ -3,8 +3,9 @@ package org.example.lionhackaton.controller;
 import org.example.lionhackaton.domain.User;
 import org.example.lionhackaton.domain.oauth.AuthTokens;
 import org.example.lionhackaton.domain.oauth.JwtTokenProvider;
-import org.example.lionhackaton.domain.oauth.KakaoLoginParams;
-import org.example.lionhackaton.domain.oauth.NaverLoginParams;
+import org.example.lionhackaton.domain.oauth.google.GoogleLoginParams;
+import org.example.lionhackaton.domain.oauth.kakao.KakaoLoginParams;
+import org.example.lionhackaton.domain.oauth.naver.NaverLoginParams;
 import org.example.lionhackaton.service.OAuthLoginService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +38,12 @@ public class AuthController {
 	}
 
 	@PostMapping("/naver")
-	public ResponseEntity<AuthTokens> loginNaver(@RequestBody NaverLoginParams params) {
+	public ResponseEntity<?> loginNaver(@RequestBody NaverLoginParams params) {
+		return ResponseEntity.ok(oAuthLoginService.login(params));
+	}
+
+	@PostMapping("/google")
+	public ResponseEntity<?> loginGoogle(@RequestBody GoogleLoginParams params) {
 		return ResponseEntity.ok(oAuthLoginService.login(params));
 	}
 }

@@ -3,9 +3,8 @@ package org.example.lionhackaton.service;
 import org.example.lionhackaton.domain.User;
 import org.example.lionhackaton.domain.oauth.AuthTokens;
 import org.example.lionhackaton.domain.oauth.AuthTokensGenerator;
-import org.example.lionhackaton.domain.oauth.OAuthInfoResponse;
-import org.example.lionhackaton.domain.oauth.OAuthLoginParams;
-import org.example.lionhackaton.domain.oauth.RequestOAuthInfoService;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthInfoResponse;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthLoginParams;
 import org.example.lionhackaton.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +24,6 @@ public class OAuthLoginService {
 	}
 
 	private Long findOrCreateMember(OAuthInfoResponse oAuthInfoResponse) {
-		System.out.println("oAuthInfoResponse = " + oAuthInfoResponse.getEmail());
 		return userRepository.findByEmail(oAuthInfoResponse.getEmail())
 			.map(User::getId)
 			.orElseGet(() -> newMember(oAuthInfoResponse));

@@ -1,4 +1,4 @@
-package org.example.lionhackaton.domain.oauth;
+package org.example.lionhackaton.domain.oauth.kakao;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

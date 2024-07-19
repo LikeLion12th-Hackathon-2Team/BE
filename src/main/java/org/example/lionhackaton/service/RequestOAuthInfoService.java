@@ -1,10 +1,14 @@
-package org.example.lionhackaton.domain.oauth;
+package org.example.lionhackaton.service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.example.lionhackaton.domain.oauth.OAuthProvider;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthApiClient;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthInfoResponse;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthLoginParams;
 import org.springframework.stereotype.Component;
 
 @Component

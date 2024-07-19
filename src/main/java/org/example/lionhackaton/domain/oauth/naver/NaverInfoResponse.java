@@ -1,4 +1,7 @@
-package org.example.lionhackaton.domain.oauth;
+package org.example.lionhackaton.domain.oauth.naver;
+
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthInfoResponse;
+import org.example.lionhackaton.domain.oauth.OAuthProvider;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

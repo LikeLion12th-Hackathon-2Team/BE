@@ -1,5 +1,9 @@
-package org.example.lionhackaton.domain.oauth;
+package org.example.lionhackaton.domain.oauth.naver;
 
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthApiClient;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthInfoResponse;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthLoginParams;
+import org.example.lionhackaton.domain.oauth.OAuthProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -68,6 +72,8 @@ public class NaverApiClient implements OAuthApiClient {
 
 		HttpEntity<?> request = new HttpEntity<>(body, httpHeaders);
 
-		return restTemplate.postForObject(url, request, NaverInfoResponse.class);
+		NaverInfoResponse naverInfoResponse = restTemplate.postForObject(url, request, NaverInfoResponse.class);
+		System.out.println("naverInfoResponse = " + naverInfoResponse.getResponse());
+		return naverInfoResponse;
 	}
 }

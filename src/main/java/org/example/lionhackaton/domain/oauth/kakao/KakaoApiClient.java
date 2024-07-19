@@ -1,5 +1,9 @@
-package org.example.lionhackaton.domain.oauth;
+package org.example.lionhackaton.domain.oauth.kakao;
 
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthApiClient;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthInfoResponse;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthLoginParams;
+import org.example.lionhackaton.domain.oauth.OAuthProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
