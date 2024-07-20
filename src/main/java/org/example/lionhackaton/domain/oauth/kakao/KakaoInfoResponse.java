@@ -29,7 +29,7 @@ public class KakaoInfoResponse implements OAuthInfoResponse {
 
 	@Override
 	public String getEmail() {
-		return null;
+		return kakaoAccount.profile.nickname + "@kakao.com";
 	}
 
 	@Override
