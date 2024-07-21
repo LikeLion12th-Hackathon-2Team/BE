@@ -3,6 +3,7 @@ package org.example.lionhackaton.service;
 import org.example.lionhackaton.domain.Diary;
 import org.example.lionhackaton.repository.DiaryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +17,12 @@ public class DiaryService {
         this.diaryRepository = diaryRepository;
     }
 
+    @Transactional
     public Diary saveDiary(Diary diary) {
         return diaryRepository.save(diary);
     }
 
+    @Transactional
     public Optional<Diary> updateDiary(Long id, Diary diaryDetails) {
         return diaryRepository.findById(id).map(diary -> {
             diary.setDiaryTitle(diaryDetails.getDiaryTitle());
@@ -42,6 +45,7 @@ public class DiaryService {
         return diaryRepository.findById(id);
     }
 
+    @Transactional
     public void deleteDiary(Long id) {
         diaryRepository.deleteById(id);
     }
