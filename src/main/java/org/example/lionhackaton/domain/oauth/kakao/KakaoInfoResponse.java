@@ -1,7 +1,7 @@
 package org.example.lionhackaton.domain.oauth.kakao;
 
-import org.example.lionhackaton.domain.oauth.interfaces.OAuthInfoResponse;
 import org.example.lionhackaton.domain.oauth.OAuthProvider;
+import org.example.lionhackaton.domain.oauth.interfaces.OAuthInfoResponse;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,6 +14,9 @@ public class KakaoInfoResponse implements OAuthInfoResponse {
 
 	@JsonProperty("kakao_account")
 	private KakaoAccount kakaoAccount;
+
+	@JsonProperty("id")
+	private Long id;
 
 	@Getter
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -29,7 +32,7 @@ public class KakaoInfoResponse implements OAuthInfoResponse {
 
 	@Override
 	public String getEmail() {
-		return kakaoAccount.profile.nickname + "@kakao.com";
+		return id + "@kakao.com";
 	}
 
 	@Override
