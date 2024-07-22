@@ -1,6 +1,7 @@
 package org.example.lionhackaton.controller;
 
 import org.example.lionhackaton.domain.User;
+import org.example.lionhackaton.domain.dto.request.RefreshTokenRequest;
 import org.example.lionhackaton.domain.oauth.AuthTokens;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.domain.oauth.JwtTokenProvider;
@@ -25,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/auth")
 public class AuthController {
 	private final OAuthLoginService oAuthLoginService;
-	private final JwtTokenProvider jwtTokenProvider;
 
 	@PostMapping("/kakao")
 	public ResponseEntity<?> loginKakao(@RequestBody KakaoLoginParams params) {
@@ -46,5 +46,17 @@ public class AuthController {
 	@PostMapping("/google")
 	public ResponseEntity<?> loginGoogle(@RequestBody GoogleLoginParams params) {
 		return ResponseEntity.ok(oAuthLoginService.login(params));
+	}
+
+	@PostMapping("/refresh")
+	public ResponseEntity<?> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+		AuthTokens tokens = oAuthLoginService.refresh(refreshTokenRequest.getRefreshToken());
+		return ResponseEntity.ok(tokens);
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		oAuthLoginService.logout(customUserDetails.getId());
+		return ResponseEntity.ok("Logged out successfully");
 	}
 }

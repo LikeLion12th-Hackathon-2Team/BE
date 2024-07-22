@@ -2,7 +2,6 @@ package org.example.lionhackaton.domain;
 
 import java.util.Set;
 
-import org.example.lionhackaton.domain.diary.Diary;
 import org.example.lionhackaton.domain.oauth.OAuthProvider;
 
 import jakarta.persistence.Entity;

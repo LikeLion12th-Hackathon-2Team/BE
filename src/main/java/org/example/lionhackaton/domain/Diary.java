@@ -1,4 +1,4 @@
-package org.example.lionhackaton.domain.diary;
+package org.example.lionhackaton.domain;
 
 import java.time.LocalDateTime;
 

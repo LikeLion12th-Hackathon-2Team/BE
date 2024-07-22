@@ -3,7 +3,7 @@ package org.example.lionhackaton.controller;
 import java.util.List;
 import java.util.Optional;
 
-import org.example.lionhackaton.domain.diary.Diary;
+import org.example.lionhackaton.domain.Diary;
 import org.example.lionhackaton.domain.dto.request.DiaryRequest;
 import org.example.lionhackaton.domain.dto.response.DiaryResponse;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
@@ -52,9 +52,8 @@ public class DiaryController {
 		@RequestBody Diary diaryDetails
 	) {
 		try {
-			Optional<Diary> updatedDiary = diaryService.updateDiary(customUserDetails, id, diaryDetails);
-			return updatedDiary.map(diary -> ResponseEntity.ok().body(diary))
-				.orElseGet(() -> ResponseEntity.notFound().build());
+			DiaryResponse updatedDiary = diaryService.updateDiary(customUserDetails, id, diaryDetails);
+			return ResponseEntity.ok(updatedDiary);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
@@ -62,8 +61,8 @@ public class DiaryController {
 
 	@GetMapping
 	public ResponseEntity<?> getAllDiaries() {
-		List<Diary> diaries = diaryService.getAllDiaries();
-		return ResponseEntity.ok().body(diaries);
+		List<DiaryResponse> allDiaries = diaryService.getAllDiaries();
+		return ResponseEntity.ok().body(allDiaries);
 	}
 
 	@GetMapping("/user")
