@@ -1,5 +1,8 @@
 package org.example.lionhackaton.domain;
 
+import java.util.Set;
+
+import org.example.lionhackaton.domain.diary.Diary;
 import org.example.lionhackaton.domain.oauth.OAuthProvider;
 
 import jakarta.persistence.Entity;
@@ -8,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +30,9 @@ public class User {
 
 	@Enumerated(EnumType.STRING)
 	private OAuthProvider oAuthProvider;
+
+	@OneToMany(mappedBy = "user")
+	public Set<Diary> diaries;
 
 	@Builder
 	public User(String email, String nickname, OAuthProvider oAuthProvider) {

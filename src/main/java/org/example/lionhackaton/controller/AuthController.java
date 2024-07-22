@@ -2,12 +2,15 @@ package org.example.lionhackaton.controller;
 
 import org.example.lionhackaton.domain.User;
 import org.example.lionhackaton.domain.oauth.AuthTokens;
+import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.domain.oauth.JwtTokenProvider;
 import org.example.lionhackaton.domain.oauth.google.GoogleLoginParams;
 import org.example.lionhackaton.domain.oauth.kakao.KakaoLoginParams;
 import org.example.lionhackaton.domain.oauth.naver.NaverLoginParams;
 import org.example.lionhackaton.service.OAuthLoginService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,10 +33,8 @@ public class AuthController {
 	}
 
 	@GetMapping("/info")
-	public ResponseEntity<?> getInfo(@RequestHeader(value = "Authorization", required = false) String token) {
-		String jwtToken = token.substring(7);
-		String userId = jwtTokenProvider.extractSubject(jwtToken);
-		User info = oAuthLoginService.getInfo(Long.valueOf(userId));
+	public ResponseEntity<?> getInfo(@AuthenticationPrincipal CustomUserDetails user) {
+		User info = oAuthLoginService.getInfo(user.getId());
 		return ResponseEntity.ok(info);
 	}
 
