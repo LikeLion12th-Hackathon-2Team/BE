@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,9 +40,14 @@ public class CommentService {
 
     }
 
-    public Optional<Comment> getCommentById(Long diary_id){
+    public List<Comment> getDiaryCommentById(Long diary_id){
 
-        return commentRepository.findByDiary_DiaryId(diary_id);
+         return commentRepository.findByDiary_DiaryId(diary_id);
+    }
+
+    public Optional<Comment> getCommentById(Long comment_id){
+
+        return commentRepository.findById(comment_id);
     }
 
     public Comment updateComment(CustomUserDetails customUserDetails, Long comment_id, String content) throws AccessDeniedException {
@@ -79,6 +85,7 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
+    @Transactional
     public void deleteComment(CustomUserDetails customUserDetails, Long comment_id) throws AccessDeniedException {
         User user = userRepository.findById(customUserDetails.getId()).orElseThrow(()->new NotFoundException("user를 찾지 못했습니다."));
         Comment comment = commentRepository.findById(comment_id).orElseThrow(()->new NotFoundException("comment를 찾지못했습니다."));

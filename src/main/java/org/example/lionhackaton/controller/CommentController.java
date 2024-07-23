@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -34,11 +35,24 @@ public class CommentController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getComment(@PathVariable("id") Long diary_id){
+    public ResponseEntity<?> getDiaryComment(@PathVariable("id") Long diary_id){
         try{
-            Optional<Comment> comment = commentService.getCommentById(diary_id);
-            return comment.map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+            List<Comment> comment = commentService.getDiaryCommentById(diary_id);
+            return ResponseEntity.ok().body(comment);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{comment_id}")
+    public ResponseEntity<?> getComment(@PathVariable("comment_id") Long comment_id){
+        try{
+            Optional<Comment> comment = commentService.getCommentById(comment_id);
+            if (comment.isPresent()) {
+                return ResponseEntity.ok().body(comment);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found");
+            }
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

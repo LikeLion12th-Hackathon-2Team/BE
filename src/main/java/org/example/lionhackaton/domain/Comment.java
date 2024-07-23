@@ -16,7 +16,7 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(hidden = true)
-    private Long commentid;
+    private Long commentId;
 
     private String content;
     private Boolean isChosen;
