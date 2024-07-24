@@ -1,8 +1,11 @@
 package org.example.lionhackaton.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+import org.example.lionhackaton.domain.ChatGPTRequest;
+import org.example.lionhackaton.domain.ChatGPTResponse;
 import org.example.lionhackaton.domain.Diary;
 import org.example.lionhackaton.domain.User;
 import org.example.lionhackaton.domain.dto.request.DiaryRequest;
@@ -10,16 +13,32 @@ import org.example.lionhackaton.domain.dto.response.DiaryResponse;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.repository.DiaryRepository;
 import org.example.lionhackaton.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class DiaryService {
 
+	@Value("${openai.model}")
+	private String model;
+
+	@Value("${openai.api.url}")
+	private String apiURL;
+
 	private final DiaryRepository diaryRepository;
 	private final UserRepository userRepository;
+	private final RestTemplate template;
 
-	public DiaryService(DiaryRepository diaryRepository, UserRepository userRepository) {
+	public DiaryService(RestTemplate template, DiaryRepository diaryRepository,
+		UserRepository userRepository) {
+		this.template = template;
 		this.diaryRepository = diaryRepository;
 		this.userRepository = userRepository;
 	}
@@ -29,6 +48,16 @@ public class DiaryService {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
+		ChatGPTRequest chatGPTRequest = getChatGPTRequest(diaryRequest);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + "sk-None-L1NGcSKoHf6WQyw1rFJoT3BlbkFJXw1grS2f76lqjp5b6ZEJ");
+
+		HttpEntity<ChatGPTRequest> entity = new HttpEntity<>(chatGPTRequest, headers);
+
+		ResponseEntity<ChatGPTResponse> chatGPTResponse = template.exchange(apiURL, HttpMethod.POST, entity, ChatGPTResponse.class);
+
 		Diary diary = new Diary(
 			diaryRequest.getDiaryTitle(),
 			diaryRequest.getSodaIndex(),
@@ -36,6 +65,8 @@ public class DiaryService {
 			diaryRequest.getPurpose(),
 			diaryRequest.getIsRepresentative(),
 			user);
+
+		diary.setGptComment(Objects.requireNonNull(chatGPTResponse.getBody()).getChoices().get(0).getMessage().getContent());
 
 		Diary save = diaryRepository.save(diary);
 
@@ -49,6 +80,17 @@ public class DiaryService {
 			save.getUpdatedAt(),
 			save.getIsRepresentative(),
 			save.getUser().getId());
+	}
+
+	private ChatGPTRequest getChatGPTRequest(DiaryRequest diaryRequest) {
+		String prompt = "[IMPORTANT] From now on, I will give all prompts in Korean. "
+			+ "이제부터 너는 내가 일기를 쓰면, 그 일기를 읽고 자존감을 불어주는 역할을 하는 상담 전문가야. "
+			+ "만약 내가 '오늘 시험을 못봐서 우울해'라고 적으면 너는 '그깟 시험 내가 못봐도 훨씬 잘살수있고 괜찮아!!' 이런식으로 적어주면 되는거야. "
+			+ "3줄 정도로 간결하게 적어주고"
+			+ "Temperature = 0.9, Top-p = 0.5, Tone = warm, Writing-style = converstaional"
+			+ "이제 내가 일기의 본문을 보여줄게 \n" + diaryRequest.getContent();
+
+		return new ChatGPTRequest(model, prompt);
 	}
 
 	@Transactional
@@ -128,4 +170,5 @@ public class DiaryService {
 				diary.getUser().getId()))
 			.toList();
 	}
+
 }

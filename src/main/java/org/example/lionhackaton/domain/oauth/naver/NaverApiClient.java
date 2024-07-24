@@ -72,8 +72,6 @@ public class NaverApiClient implements OAuthApiClient {
 
 		HttpEntity<?> request = new HttpEntity<>(body, httpHeaders);
 
-		NaverInfoResponse naverInfoResponse = restTemplate.postForObject(url, request, NaverInfoResponse.class);
-		System.out.println("naverInfoResponse = " + naverInfoResponse.getResponse());
-		return naverInfoResponse;
+		return restTemplate.postForObject(url, request, NaverInfoResponse.class);
 	}
 }
