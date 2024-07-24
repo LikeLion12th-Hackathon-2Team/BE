@@ -78,7 +78,7 @@ public class CommentService {
         }
 
         if(comment.getUser().getId().equals(user.getId())){
-            throw new AccessDeniedException("수정 권한이 없습니다");
+            throw new AccessDeniedException("자신의 댓글은 채택할 수 없습니다");
         }
 
         comment.setIsChosen(Boolean.TRUE);
