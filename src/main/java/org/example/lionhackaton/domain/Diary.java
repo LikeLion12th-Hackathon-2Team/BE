@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.example.lionhackaton.Lisenter.DiaryListener;
 import org.example.lionhackaton.domain.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -28,7 +29,10 @@ public class Diary {
 	private Long sodaIndex;
 	private String content;
 	private String purpose;
+
+	@Column(columnDefinition = "LONGTEXT")
 	private String gptComment;
+
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private Boolean isRepresentative;

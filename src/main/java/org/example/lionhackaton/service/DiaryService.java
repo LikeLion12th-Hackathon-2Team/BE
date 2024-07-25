@@ -36,8 +36,7 @@ public class DiaryService {
 	private final UserRepository userRepository;
 	private final RestTemplate template;
 
-	public DiaryService(RestTemplate template, DiaryRepository diaryRepository,
-		UserRepository userRepository) {
+	public DiaryService(RestTemplate template, DiaryRepository diaryRepository, UserRepository userRepository) {
 		this.template = template;
 		this.diaryRepository = diaryRepository;
 		this.userRepository = userRepository;
@@ -45,6 +44,7 @@ public class DiaryService {
 
 	@Transactional
 	public DiaryResponse saveDiary(CustomUserDetails customUserDetails, DiaryRequest diaryRequest) {
+
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -56,7 +56,8 @@ public class DiaryService {
 
 		HttpEntity<ChatGPTRequest> entity = new HttpEntity<>(chatGPTRequest, headers);
 
-		ResponseEntity<ChatGPTResponse> chatGPTResponse = template.exchange(apiURL, HttpMethod.POST, entity, ChatGPTResponse.class);
+		ResponseEntity<ChatGPTResponse> chatGPTResponse = template.exchange(apiURL, HttpMethod.POST, entity,
+			ChatGPTResponse.class);
 
 		Diary diary = new Diary(
 			diaryRequest.getDiaryTitle(),
@@ -66,7 +67,8 @@ public class DiaryService {
 			diaryRequest.getIsRepresentative(),
 			user);
 
-		diary.setGptComment(Objects.requireNonNull(chatGPTResponse.getBody()).getChoices().get(0).getMessage().getContent());
+		diary.setGptComment(
+			Objects.requireNonNull(chatGPTResponse.getBody()).getChoices().get(0).getMessage().getContent());
 
 		Diary save = diaryRepository.save(diary);
 
@@ -92,6 +94,8 @@ public class DiaryService {
 
 		return new ChatGPTRequest(model, prompt);
 	}
+
+
 
 	@Transactional
 	public DiaryResponse updateDiary(CustomUserDetails customUserDetails, Long id, Diary diaryDetails) {
