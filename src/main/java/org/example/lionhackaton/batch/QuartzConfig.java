@@ -1,5 +1,6 @@
 package org.example.lionhackaton.batch;
 
+import org.example.lionhackaton.batch.BatchQuartzJob;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;

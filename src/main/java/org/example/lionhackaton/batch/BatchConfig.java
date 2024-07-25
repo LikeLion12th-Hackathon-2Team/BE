@@ -39,7 +39,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.client.RestTemplate;
 
@@ -139,7 +138,7 @@ public class BatchConfig {
 				paramsBuilder.addString("diaryContent", diary.getContent());
 			} else {
 				paramsBuilder.addString("userId", user.getId().toString());
-				paramsBuilder.addString("diaryContent", "No diary updated in the last 24 hours");
+				paramsBuilder.addString("diaryContent", "랜덤 추천");
 			}
 
 			JobParameters params = paramsBuilder.toJobParameters();
@@ -180,6 +179,7 @@ public class BatchConfig {
 
 				ResponseEntity<ChatGPTResponse> chatGPTResponse = template.exchange(apiURL, HttpMethod.POST, entity,
 					ChatGPTResponse.class);
+
 				Optional<TodayRecommend> todayRecommendRepositoryByUserId = todayRecommendRepository.findByUserId(
 					Long.valueOf(userId));
 
@@ -208,17 +208,14 @@ public class BatchConfig {
 	}
 
 	private ChatGPTRequest getChatGPTRequest(String diaryContent) {
-		String prompt = "넌 이제부터 제품이나, 운동같은걸 추천해줘야해. "
-			+ "내가 일기를 줄건데, 그 일기를 읽고 그 일기에 맞는 제품을 추천해줘. "
-			+ "만약에 No diary updated in the last 24 hours 라고 적혀있으면, 그냥 랜덤으로 제품을 추천해주면 돼. "
-			+ "한국에서 최근 가장 인기있는 제품을 찾아서 추천해줘. 근데 가전제품 이런거 말고, 먹는 제품같은걸 추천해줘"
-			+ "답은 짧게 3줄정도로 적어주고, 존댓말로 적어줘. 그리고 3줄 말고는 다른말은 적어주지 마."
-			+ "첫째줄은 그 저품에 대한 장점이나 그 제품에 대한 설명, 제품이 어디에 좋은지를 적어주면 돼."
-			+ "두번째줄은 일기에 어떤점 떄문에 추천했는지, 만약 일기가 없다면 그냥 어제 쓴 일기가 없어서 랜덤으로 추천했다고 적어주면 돼."
-			+ "그리고 마지막은 응원글을 적어주면 돼. 잘 적어줄거라고 믿어. "
-			+ "이제 내가 일기를 보여줄게! \n" + diaryContent
-			+ "Temperature = 0.9, Top-p = 0.5, Tone = warm, Writing-style = converstaional";
+		String prompt =
+			"I'll show you my diary. It's a diary between small quotes.  diary = '" + diaryContent
+				+ "' From now on, you have to look at the diary up there and recommend a product or exercise that fits that diary. [IMPORTANT] Write down the answer in 3 lines\n"
+				+ "[IMPORTANT] Don't write anything other than 4 lines.\n"
+				+ "Write it down in honorifics. I'll give you a diary, read it and recommend a product that fits your diary. If it says \"랜덤 추천\" you can just randomly recommend a product. Find and recommend the most popular exercise or product in Korea recently. In the first line, you can write down the merits of the product, the description of the product, and where the product is good. In the second line, you can write down why you recommended it in your diary, and if you don't have a diary, you can just write it down randomly because there was no diary you wrote yesterday. And in the end, you can write down your support. I believe you will write it down well. Temperature = 0.9, Top-p = 0.5, Tone = warm, Writing-style = conversational"
+				+ "[IMPORTANT] DO not say any words except 3lines such as diaryContent or title or 다이어리 : , And say the result in Korean.";
 
+		System.out.println("prompt = " + prompt);
 		ChatGPTRequest chatGPTRequest = new ChatGPTRequest(model, prompt);
 		return chatGPTRequest;
 	}
