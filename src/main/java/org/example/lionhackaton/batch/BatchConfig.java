@@ -215,9 +215,7 @@ public class BatchConfig {
 				+ "Write it down in honorifics. I'll give you a diary, read it and recommend a product that fits your diary. If it says \"랜덤 추천\" you can just randomly recommend a product. Find and recommend the most popular exercise or product in Korea recently. In the first line, you can write down the merits of the product, the description of the product, and where the product is good. In the second line, you can write down why you recommended it in your diary, and if you don't have a diary, you can just write it down randomly because there was no diary you wrote yesterday. And in the end, you can write down your support. I believe you will write it down well. Temperature = 0.9, Top-p = 0.5, Tone = warm, Writing-style = conversational"
 				+ "[IMPORTANT] DO not say any words except 3lines such as diaryContent or title or 다이어리 : , And say the result in Korean.";
 
-		System.out.println("prompt = " + prompt);
-		ChatGPTRequest chatGPTRequest = new ChatGPTRequest(model, prompt);
-		return chatGPTRequest;
+		return new ChatGPTRequest(model, prompt);
 	}
 
 }
