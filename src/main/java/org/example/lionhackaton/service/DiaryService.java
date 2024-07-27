@@ -3,6 +3,8 @@ package org.example.lionhackaton.service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.time.LocalDate;
+import java.time.YearMonth;
 
 import org.example.lionhackaton.domain.ChatGPTRequest;
 import org.example.lionhackaton.domain.ChatGPTResponse;
@@ -98,6 +100,7 @@ public class DiaryService {
 
 
 	@Transactional
+
 	public DiaryResponse updateDiary(CustomUserDetails customUserDetails, Long id, Diary diaryDetails) {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new RuntimeException("User not found"));
@@ -174,5 +177,45 @@ public class DiaryService {
 				diary.getUser().getId()))
 			.toList();
 	}
+	@Transactional
+	public List<Diary> getFavoriteDiaries(Long userId) {
+		return diaryRepository.findByUserIdAndIsFavoriteTrue(userId);
+	}
 
+	@Transactional
+	public Diary toggleFavorite(Long userId, Long diaryId) {
+		Diary diary = diaryRepository.findById(diaryId)
+				.orElseThrow(() -> new RuntimeException("Diary not found"));
+
+		if (!diary.getUser().getId().equals(userId)) {
+			throw new RuntimeException("User not authorized to modify this diary");
+		}
+
+		diary.setIsFavorite(!diary.getIsFavorite());
+		return diaryRepository.save(diary);
+	}
+	@Transactional
+	public Diary toggleShared(Long userId, Long diaryId) {
+		Diary diary = diaryRepository.findById(diaryId)
+				.orElseThrow(() -> new RuntimeException("Diary not found"));
+
+		if (!diary.getUser().getId().equals(userId)) {
+			throw new RuntimeException("User not authorized to modify this diary");
+		}
+
+		diary.setIsShared(!diary.getIsShared());
+		return diaryRepository.save(diary);
+	}
+
+	@Transactional
+	public double getMonthlySodaIndex(Long userId, YearMonth yearMonth) {
+		LocalDate startDate = yearMonth.atDay(1);
+		LocalDate endDate = yearMonth.atEndOfMonth();
+		List<Diary> diaries = diaryRepository.findByUserIdAndDateRange(userId, startDate, endDate);
+
+		return diaries.stream()
+				.mapToDouble(Diary::getSodaIndex)
+				.average()
+				.orElse(0.0);
+	}
 }

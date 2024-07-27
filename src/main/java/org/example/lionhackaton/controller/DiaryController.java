@@ -2,6 +2,7 @@ package org.example.lionhackaton.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.YearMonth;
 
 import org.example.lionhackaton.domain.Diary;
 import org.example.lionhackaton.domain.dto.request.DiaryRequest;
@@ -34,8 +35,8 @@ public class DiaryController {
 
 	@PostMapping
 	public ResponseEntity<?> createDiary(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@RequestBody DiaryRequest diary
+			@AuthenticationPrincipal CustomUserDetails customUserDetails,
+			@RequestBody DiaryRequest diary
 	) {
 		try {
 			DiaryResponse savedDiary = diaryService.saveDiary(customUserDetails, diary);
@@ -47,9 +48,9 @@ public class DiaryController {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<?> updateDiary(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@PathVariable Long id,
-		@RequestBody Diary diaryDetails
+			@AuthenticationPrincipal CustomUserDetails customUserDetails,
+			@PathVariable Long id,
+			@RequestBody Diary diaryDetails
 	) {
 		try {
 			DiaryResponse updatedDiary = diaryService.updateDiary(customUserDetails, id, diaryDetails);
@@ -67,7 +68,7 @@ public class DiaryController {
 
 	@GetMapping("/user")
 	public ResponseEntity<?> getUserAllDiaries(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails
+			@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
 		try {
 			List<DiaryResponse> diaries = diaryService.getUserAllDiaries(customUserDetails);
@@ -79,19 +80,61 @@ public class DiaryController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getDiaryById(
-		@PathVariable Long id
+			@PathVariable Long id
 	) {
 		Optional<Diary> diary = diaryService.getDiaryById(id);
 		return diary.map(ResponseEntity::ok)
-			.orElseGet(() -> ResponseEntity.notFound().build());
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteDiary(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@PathVariable Long id
+			@AuthenticationPrincipal CustomUserDetails customUserDetails,
+			@PathVariable Long id
 	) {
 		diaryService.deleteDiary(customUserDetails, id);
 		return ResponseEntity.noContent().build();
 	}
+
+	@GetMapping("/favorites/{userId}")
+	public ResponseEntity<?> getFavoriteDiaries(@PathVariable Long userId) {
+		try {
+			List<Diary> favoriteDiaries = diaryService.getFavoriteDiaries(userId);
+			return ResponseEntity.ok(favoriteDiaries);
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
+
+	@PutMapping("/favorites/{userId}/{diaryId}")
+	public ResponseEntity<?> toggleFavorite(@PathVariable Long userId, @PathVariable Long diaryId) {
+		try {
+			Diary updatedDiary = diaryService.toggleFavorite(userId, diaryId);
+			return ResponseEntity.ok(updatedDiary);
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
+	@PutMapping("/shared/{userId}/{diaryId}")
+	public ResponseEntity<?> toggleShared(@PathVariable Long userId, @PathVariable Long diaryId) {
+		try {
+			Diary updatedDiary = diaryService.toggleShared(userId, diaryId);
+			return ResponseEntity.ok(updatedDiary);
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
+
+	@GetMapping("/soda-index/{userId}/{yearMonth}")  // 추가된 부분
+	public ResponseEntity<?> getMonthlySodaIndex(@PathVariable Long userId, @PathVariable String yearMonth) {  // 추가된 부분
+		try {
+			YearMonth ym = YearMonth.parse(yearMonth);
+			double sodaIndex = diaryService.getMonthlySodaIndex(userId, ym);
+			return ResponseEntity.ok(sodaIndex);
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
 }
+
+
