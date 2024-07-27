@@ -21,11 +21,14 @@ public class CommentService {
 	private final UserRepository userRepository;
 	private final DiaryRepository diaryRepository;
 
+	private final UserService userService;
+
 	public CommentService(CommentRepository commentRepository, UserRepository userRepository,
-		DiaryRepository diaryRepository) {
+		DiaryRepository diaryRepository,UserService userService) {
 		this.commentRepository = commentRepository;
 		this.userRepository = userRepository;
 		this.diaryRepository = diaryRepository;
+		this.userService = userService;
 	}
 
 	@Transactional
@@ -40,6 +43,8 @@ public class CommentService {
 		comment.setUser(user);
 		comment.setDiary(diary);
 		Comment save = commentRepository.save(comment);
+
+		userService.plusCommentPoint(customUserDetails);
 
 		return new CommentResponse(
 			save.getCommentId(),
@@ -91,6 +96,7 @@ public class CommentService {
 			throw new AccessDeniedException("수정 권한이 없습니다");
 		}
 
+
 		comment.setContent(content);
 
 		Comment save = commentRepository.save(comment);
@@ -116,6 +122,7 @@ public class CommentService {
 		}
 
 		comment.setIsChosen(Boolean.TRUE);
+		userService.plusChosenPoint(comment);
 
 		Comment save = commentRepository.save(comment);
 		return new CommentResponse(save.getCommentId(), save.getContent(), save.getIsChosen(), save.getCreatedAt(),
@@ -132,6 +139,8 @@ public class CommentService {
 		if (!comment.getUser().getId().equals(user.getId())) {
 			throw new AccessDeniedException("삭제 권한이 없습니다");
 		}
+
+		userService.minusCommentPoint(customUserDetails, comment);
 		commentRepository.deleteById(comment_id);
 	}
 }
