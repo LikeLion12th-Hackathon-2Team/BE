@@ -125,7 +125,7 @@ public class DiaryController {
 		}
 	}
 
-	@GetMapping("/soda-index/{userId}/{yearMonth}")  // 추가된 부분
+	@GetMapping("/soda-index/{userId}/{yearMonth}")
 	public ResponseEntity<?> getMonthlySodaIndex(@PathVariable Long userId, @PathVariable String yearMonth) {  // 추가된 부분
 		try {
 			YearMonth ym = YearMonth.parse(yearMonth);
