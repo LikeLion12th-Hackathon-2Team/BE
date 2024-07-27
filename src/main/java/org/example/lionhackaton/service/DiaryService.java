@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.webjars.NotFoundException;
 
 @Service
 public class DiaryService {
@@ -81,6 +82,7 @@ public class DiaryService {
 			save.getCreatedAt(),
 			save.getUpdatedAt(),
 			save.getIsRepresentative(),
+			save.getBookmark(),
 			save.getUser().getId());
 	}
 
@@ -94,8 +96,6 @@ public class DiaryService {
 
 		return new ChatGPTRequest(model, prompt);
 	}
-
-
 
 	@Transactional
 	public DiaryResponse updateDiary(CustomUserDetails customUserDetails, Long id, Diary diaryDetails) {
@@ -127,18 +127,18 @@ public class DiaryService {
 			diary1.getCreatedAt(),
 			diary1.getUpdatedAt(),
 			diary1.getIsRepresentative(),
+			diary1.getBookmark(),
 			diary1.getUser().getId());
 	}
 
 	public List<DiaryResponse> getAllDiaries() {
-		return diaryRepository.findAll().stream().map(diary -> {
-			return new DiaryResponse(
-				diary.getDiaryId(),
-				diary.getDiaryTitle(), diary.getSodaIndex(), diary.getContent(), diary.getPurpose(),
-				diary.getGptComment(),
-				diary.getCreatedAt(), diary.getUpdatedAt(), diary.getIsRepresentative(), diary.getUser().getId()
-			);
-		}).toList();
+		return diaryRepository.findAll().stream().map(diary -> new DiaryResponse(
+			diary.getDiaryId(),
+			diary.getDiaryTitle(), diary.getSodaIndex(), diary.getContent(), diary.getPurpose(),
+			diary.getGptComment(),
+			diary.getCreatedAt(), diary.getUpdatedAt(), diary.getIsRepresentative(), diary.getBookmark(),
+			diary.getUser().getId()
+		)).toList();
 	}
 
 	public Optional<Diary> getDiaryById(Long id) {
@@ -171,8 +171,35 @@ public class DiaryService {
 				diary.getCreatedAt(),
 				diary.getUpdatedAt(),
 				diary.getIsRepresentative(),
+				diary.getBookmark(),
 				diary.getUser().getId()))
 			.toList();
+	}
+
+	public List<DiaryResponse> getBookmarkDiaries(CustomUserDetails customUserDetails) {
+		User user = userRepository.findById(customUserDetails.getId())
+			.orElseThrow(() -> new NotFoundException("User not found"));
+
+		List<DiaryResponse> diaryResponses = user.getDiaries().stream().map(diary -> {
+			if (diary.getBookmark()) {
+				return new DiaryResponse(
+					diary.getDiaryId(),
+					diary.getDiaryTitle(),
+					diary.getSodaIndex(),
+					diary.getContent(),
+					diary.getPurpose(),
+					diary.getGptComment(),
+					diary.getCreatedAt(),
+					diary.getUpdatedAt(),
+					diary.getIsRepresentative(),
+					diary.getBookmark(),
+					diary.getUser().getId());
+			} else {
+				return null;
+			}
+		}).toList();
+
+		return diaryResponses;
 	}
 
 }

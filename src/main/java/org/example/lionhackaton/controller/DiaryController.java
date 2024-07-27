@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.webjars.NotFoundException;
 
 @RestController
 @RequestMapping("/api/diary")
@@ -77,11 +78,11 @@ public class DiaryController {
 		}
 	}
 
-	@GetMapping("/{id}")
-	public ResponseEntity<?> getDiaryById(
-		@PathVariable Long id
+	@GetMapping("/{user_id}")
+	public ResponseEntity<?> getDiaryByUserId(
+		@PathVariable Long user_id
 	) {
-		Optional<Diary> diary = diaryService.getDiaryById(id);
+		Optional<Diary> diary = diaryService.getDiaryById(user_id);
 		return diary.map(ResponseEntity::ok)
 			.orElseGet(() -> ResponseEntity.notFound().build());
 	}
@@ -93,5 +94,17 @@ public class DiaryController {
 	) {
 		diaryService.deleteDiary(customUserDetails, id);
 		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping("/bookmark")
+	public ResponseEntity<?> getBookmarkDiaries(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails
+	) {
+		try {
+			List<DiaryResponse> bookmarkDiaries = diaryService.getBookmarkDiaries(customUserDetails);
+			return ResponseEntity.ok().body(bookmarkDiaries);
+		} catch (NotFoundException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		}
 	}
 }
