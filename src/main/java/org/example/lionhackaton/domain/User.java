@@ -39,6 +39,9 @@ public class User {
 	public Set<Diary> diaries;
 
 	@OneToMany(mappedBy = "user")
+	public Set<DonateHistory> donateHistories;
+
+	@OneToMany(mappedBy = "user")
 	public Set<Comment> comments;
 
 	@Builder
