@@ -35,6 +35,7 @@ public class Diary {
 
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	private Boolean bookmark = false;
 	private Boolean isRepresentative;
 	private Boolean isFavorite;
 	private Boolean isShared;

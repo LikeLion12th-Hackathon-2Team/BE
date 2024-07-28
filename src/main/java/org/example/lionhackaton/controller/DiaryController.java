@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.webjars.NotFoundException;
 
 @RestController
 @RequestMapping("/api/diary")
@@ -78,11 +79,11 @@ public class DiaryController {
 		}
 	}
 
-	@GetMapping("/{id}")
-	public ResponseEntity<?> getDiaryById(
-			@PathVariable Long id
+	@GetMapping("/{userId}")
+	public ResponseEntity<?> getDiaryByUserId(
+		@PathVariable Long user_id
 	) {
-		Optional<Diary> diary = diaryService.getDiaryById(id);
+		Optional<Diary> diary = diaryService.getDiaryById(user_id);
 		return diary.map(ResponseEntity::ok)
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
@@ -94,16 +95,6 @@ public class DiaryController {
 	) {
 		diaryService.deleteDiary(customUserDetails, id);
 		return ResponseEntity.noContent().build();
-	}
-
-	@GetMapping("/favorites/{userId}")
-	public ResponseEntity<?> getFavoriteDiaries(@PathVariable Long userId) {
-		try {
-			List<Diary> favoriteDiaries = diaryService.getFavoriteDiaries(userId);
-			return ResponseEntity.ok(favoriteDiaries);
-		} catch (RuntimeException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
 	}
 
 	@PutMapping("/favorites/{userId}/{diaryId}")
@@ -133,6 +124,16 @@ public class DiaryController {
 			return ResponseEntity.ok(sodaIndex);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
+	@GetMapping("/favorites")
+	public ResponseEntity<?> getFavoriteDiaries(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails
+	) {
+		try {
+			List<DiaryResponse> bookmarkDiaries = diaryService.getBookmarkDiaries(customUserDetails);
+			return ResponseEntity.ok().body(bookmarkDiaries);
+		} catch (NotFoundException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		}
 	}
 }

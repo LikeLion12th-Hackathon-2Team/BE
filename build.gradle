@@ -47,7 +47,6 @@ dependencies {
     //batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation'org.springframework.boot:spring-boot-starter-quartz'
-    implementation 'org.springframework.retry:spring-retry'
 }
 
 tasks.named('test') {
