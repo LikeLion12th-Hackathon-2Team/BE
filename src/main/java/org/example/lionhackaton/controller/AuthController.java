@@ -10,6 +10,7 @@ import org.example.lionhackaton.domain.oauth.naver.NaverLoginParams;
 import org.example.lionhackaton.service.OAuthLoginService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,5 +56,11 @@ public class AuthController {
 	public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		oAuthLoginService.logout(customUserDetails.getId());
 		return ResponseEntity.ok("Logged out successfully");
+	}
+
+	@DeleteMapping("/delete-account")
+	public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		oAuthLoginService.delete(customUserDetails);
+		return ResponseEntity.ok("Account deleted successfully");
 	}
 }

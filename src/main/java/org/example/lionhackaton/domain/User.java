@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.example.lionhackaton.domain.oauth.OAuthProvider;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,13 +22,6 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 public class User {
-
-	@OneToMany(mappedBy = "user")
-	public Set<Diary> diaries;
-	@OneToMany(mappedBy = "user")
-	public Set<DonateHistory> donateHistories;
-	@OneToMany(mappedBy = "user")
-	public Set<Comment> comments;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -38,6 +32,13 @@ public class User {
 	private int dailyCommentCount = 10;
 	@Enumerated(EnumType.STRING)
 	private OAuthProvider oAuthProvider;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	public Set<Diary> diaries;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	public Set<DonateHistory> donateHistories;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	public Set<Comment> comments;
 
 	@Builder
 	public User(String email, String nickname, OAuthProvider oAuthProvider, Long point, int dailyDiaryCount,
