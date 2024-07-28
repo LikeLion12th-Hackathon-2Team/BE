@@ -39,10 +39,13 @@ public class DiaryService {
 	private final UserRepository userRepository;
 	private final RestTemplate template;
 
-	public DiaryService(RestTemplate template, DiaryRepository diaryRepository, UserRepository userRepository) {
+	private final UserService userService;
+
+	public DiaryService(RestTemplate template, DiaryRepository diaryRepository, UserRepository userRepository,UserService userService) {
 		this.template = template;
 		this.diaryRepository = diaryRepository;
 		this.userRepository = userRepository;
+		this.userService = userService;
 	}
 
 	@Transactional
@@ -74,6 +77,7 @@ public class DiaryService {
 			Objects.requireNonNull(chatGPTResponse.getBody()).getChoices().get(0).getMessage().getContent());
 
 		Diary save = diaryRepository.save(diary);
+		userService.plusDiaryPoint(customUserDetails);
 
 		return new DiaryResponse(save.getDiaryId(),
 			save.getDiaryTitle(),
@@ -153,9 +157,13 @@ public class DiaryService {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
+
 		user.getDiaries().stream().map(Diary::getDiaryId).filter(diaryId -> diaryId.equals(id))
 			.findFirst().orElseThrow(() -> new RuntimeException("Diary not found"));
 
+		Diary diary = diaryRepository.findById(id).orElseThrow(() -> new NotFoundException("diary not found"));
+
+		userService.minusDiaryPoint(customUserDetails, diary);
 		diaryRepository.deleteById(id);
 	}
 

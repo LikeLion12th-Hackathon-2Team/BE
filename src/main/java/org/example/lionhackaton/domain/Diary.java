@@ -56,4 +56,6 @@ public class Diary {
 	public Diary() {
 
 	}
+
+
 }
