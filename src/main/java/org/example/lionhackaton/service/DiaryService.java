@@ -34,17 +34,14 @@ import org.webjars.NotFoundException;
 @Service
 public class DiaryService {
 
-	@Value("${openai.model}")
-	private String model;
-
-	@Value("${openai.api.url}")
-	private String apiURL;
-
 	private final DiaryRepository diaryRepository;
 	private final UserRepository userRepository;
 	private final RestTemplate template;
-
 	private final UserService userService;
+	@Value("${openai.model}")
+	private String model;
+	@Value("${openai.api.url}")
+	private String apiURL;
 
 	public DiaryService(RestTemplate template, DiaryRepository diaryRepository, UserRepository userRepository,
 		UserService userService) {

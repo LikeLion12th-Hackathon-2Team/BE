@@ -2,7 +2,6 @@ package org.example.lionhackaton.domain;
 
 import java.time.LocalDateTime;
 
-import org.example.lionhackaton.Lisenter.DiaryListener;
 import org.example.lionhackaton.Lisenter.DonateHistoryListener;
 
 import jakarta.persistence.Entity;

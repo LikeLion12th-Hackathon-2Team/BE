@@ -22,27 +22,22 @@ import lombok.Setter;
 @NoArgsConstructor
 public class User {
 
+	@OneToMany(mappedBy = "user")
+	public Set<Diary> diaries;
+	@OneToMany(mappedBy = "user")
+	public Set<DonateHistory> donateHistories;
+	@OneToMany(mappedBy = "user")
+	public Set<Comment> comments;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
 	private String email;
 	private String nickname;
 	private Long point = 0L;
 	private int dailyDiaryCount = 1;
 	private int dailyCommentCount = 10;
-
 	@Enumerated(EnumType.STRING)
 	private OAuthProvider oAuthProvider;
-
-	@OneToMany(mappedBy = "user")
-	public Set<Diary> diaries;
-
-	@OneToMany(mappedBy = "user")
-	public Set<DonateHistory> donateHistories;
-
-	@OneToMany(mappedBy = "user")
-	public Set<Comment> comments;
 
 	@Builder
 	public User(String email, String nickname, OAuthProvider oAuthProvider, Long point, int dailyDiaryCount,

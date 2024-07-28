@@ -51,18 +51,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BatchConfig {
 
-	@Value("${openai.model}")
-	private String model;
-
-	@Value("${openai.api.url}")
-	private String apiURL;
-
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager transactionManager;
 	private final JobLauncher jobLauncher;
 	private final EntityManagerFactory entityManagerFactory;
 	private final RestTemplate template;
 	private final TodayRecommendRepository todayRecommendRepository;
+	@Value("${openai.model}")
+	private String model;
+	@Value("${openai.api.url}")
+	private String apiURL;
 
 	@Autowired
 	public BatchConfig(JobRepository jobRepository, PlatformTransactionManager transactionManager,

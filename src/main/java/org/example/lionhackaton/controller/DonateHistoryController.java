@@ -27,7 +27,7 @@ public class DonateHistoryController {
 	public ResponseEntity<?> saveDonateHistory(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@RequestBody DonateHistoryRequest donateHistory
-		) {
+	) {
 		try {
 			donateHistoryService.saveDonateHistory(customUserDetails, donateHistory);
 			return ResponseEntity.status(HttpStatus.CREATED).body("Donation saved successfully");
@@ -39,7 +39,7 @@ public class DonateHistoryController {
 	@GetMapping("/get")
 	public ResponseEntity<?> getDonateHistory(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails
-		) {
+	) {
 		try {
 			return ResponseEntity.ok(donateHistoryService.getDonateHistory(customUserDetails));
 		} catch (RuntimeException e) {

@@ -100,7 +100,8 @@ public class DiaryController {
 	}
 
 	@PutMapping("/favorites/{diaryId}")
-	public ResponseEntity<?> toggleFavorite(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long diaryId) {
+	public ResponseEntity<?> toggleFavorite(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Long diaryId) {
 		try {
 			DiaryResponse updatedDiary = diaryService.toggleFavorite(customUserDetails, diaryId);
 			return ResponseEntity.ok(updatedDiary);
@@ -110,7 +111,8 @@ public class DiaryController {
 	}
 
 	@PutMapping("/shared/{diaryId}")
-	public ResponseEntity<?> toggleShared(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long diaryId) {
+	public ResponseEntity<?> toggleShared(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Long diaryId) {
 		try {
 			DiaryResponse updatedDiary = diaryService.toggleShared(customUserDetails, diaryId);
 			return ResponseEntity.ok(updatedDiary);

@@ -34,7 +34,7 @@ public class OAuthLoginService {
 		AuthTokens authTokens = authTokensGenerator.generate(userId);
 
 		Optional<RefreshToken> byUserId = refreshTokenRepository.findByUserId(userId);
-		if(byUserId.isPresent()) {
+		if (byUserId.isPresent()) {
 			RefreshToken refreshTokenEntity = byUserId.get();
 			refreshTokenEntity.setToken(authTokens.getRefreshToken());
 			refreshTokenRepository.save(refreshTokenEntity);

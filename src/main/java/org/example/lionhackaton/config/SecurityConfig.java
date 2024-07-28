@@ -18,23 +18,24 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtTokenProvider jwtTokenProvider;
+	private final JwtTokenProvider jwtTokenProvider;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable)  // CSRF 보호 비활성화
-            .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(authorizeRequests ->
-                authorizeRequests
-                    .anyRequest().permitAll()) // 그 외 요청은 인증 필요
-            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http
+			.csrf(AbstractHttpConfigurer::disable)  // CSRF 보호 비활성화
+			.sessionManagement(
+				sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.authorizeHttpRequests(authorizeRequests ->
+				authorizeRequests
+					.anyRequest().permitAll()) // 그 외 요청은 인증 필요
+			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+		return http.build();
+	}
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

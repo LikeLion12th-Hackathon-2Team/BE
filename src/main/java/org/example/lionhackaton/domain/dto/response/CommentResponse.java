@@ -2,11 +2,6 @@ package org.example.lionhackaton.domain.dto.response;
 
 import java.time.LocalDateTime;
 
-import org.example.lionhackaton.domain.Diary;
-import org.example.lionhackaton.domain.User;
-
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 

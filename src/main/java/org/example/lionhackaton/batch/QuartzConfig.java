@@ -1,11 +1,10 @@
 package org.example.lionhackaton.batch;
 
-import org.example.lionhackaton.batch.BatchQuartzJob;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.quartz.CronScheduleBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
