@@ -13,4 +13,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 	List<Diary> findByUserIdAndIsFavoriteTrue(Long userId);
 
 	List<Diary> findByUserIdAndCreatedAtBetween(Long userId, LocalDateTime startDate, LocalDateTime endDate);
+
+	List<Diary> findByIsShared(Boolean isShared);
 }

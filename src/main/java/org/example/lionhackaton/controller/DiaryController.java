@@ -156,6 +156,16 @@ public class DiaryController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		}
 	}
+
+	@GetMapping("/shared")
+	public ResponseEntity<?> getSharedDiaries() {
+		try {
+			List<DiaryResponse> sharedDiaries = diaryService.getSharedDiaries();
+			return ResponseEntity.ok().body(sharedDiaries);
+		} catch (NotFoundException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		}
+	}
 }
 
 

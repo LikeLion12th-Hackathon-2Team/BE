@@ -252,7 +252,8 @@ public class DiaryService {
 	public Map<Integer, Double> getDailySodaIndexesForMonth(CustomUserDetails customUserDetails, YearMonth yearMonth) {
 		LocalDateTime startDate = yearMonth.atDay(1).atStartOfDay();
 		LocalDateTime endDate = yearMonth.atEndOfMonth().atTime(23, 59, 59);
-		List<Diary> diaries = diaryRepository.findByUserIdAndCreatedAtBetween(customUserDetails.getId(), startDate, endDate)
+		List<Diary> diaries = diaryRepository.findByUserIdAndCreatedAtBetween(customUserDetails.getId(), startDate,
+				endDate)
 			.stream()
 			.filter(Diary::getIsRepresentative)
 			.collect(Collectors.toList());
@@ -306,4 +307,25 @@ public class DiaryService {
 		}).toList();
 	}
 
+	public List<DiaryResponse> getSharedDiaries() {
+		List<Diary> sharedDiaries = diaryRepository.findByIsShared(true);
+		List<DiaryResponse> sharedDiariesResponse = new ArrayList<>();
+		for (Diary diary : sharedDiaries) {
+			sharedDiariesResponse.add(new DiaryResponse(
+				diary.getDiaryId(),
+				diary.getDiaryTitle(),
+				diary.getSodaIndex(),
+				diary.getContent(),
+				diary.getPurpose(),
+				diary.getGptComment(),
+				diary.getCreatedAt(),
+				diary.getUpdatedAt(),
+				diary.getIsRepresentative(),
+				diary.getIsFavorite(),
+				diary.getIsShared(),
+				diary.getUser().getId()));
+		}
+
+		return sharedDiariesResponse;
+	}
 }
