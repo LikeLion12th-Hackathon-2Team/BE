@@ -19,6 +19,7 @@ public class DiaryResponse {
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private Boolean isRepresentative;
-	private Boolean bookmark;
+	private Boolean isShared;
+	private Boolean isFavorite;
 	private Long userId;
 }

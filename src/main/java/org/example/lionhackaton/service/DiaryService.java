@@ -1,10 +1,14 @@
 package org.example.lionhackaton.service;
 
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.time.LocalDate;
-import java.time.YearMonth;
+import java.util.stream.Collectors;
 
 import org.example.lionhackaton.domain.ChatGPTRequest;
 import org.example.lionhackaton.domain.ChatGPTResponse;
@@ -41,7 +45,8 @@ public class DiaryService {
 
 	private final UserService userService;
 
-	public DiaryService(RestTemplate template, DiaryRepository diaryRepository, UserRepository userRepository,UserService userService) {
+	public DiaryService(RestTemplate template, DiaryRepository diaryRepository, UserRepository userRepository,
+		UserService userService) {
 		this.template = template;
 		this.diaryRepository = diaryRepository;
 		this.userRepository = userRepository;
@@ -88,7 +93,8 @@ public class DiaryService {
 			save.getCreatedAt(),
 			save.getUpdatedAt(),
 			save.getIsRepresentative(),
-			save.getBookmark(),
+			save.getIsShared(),
+			save.getIsFavorite(),
 			save.getUser().getId());
 	}
 
@@ -134,7 +140,8 @@ public class DiaryService {
 			diary1.getCreatedAt(),
 			diary1.getUpdatedAt(),
 			diary1.getIsRepresentative(),
-			diary1.getBookmark(),
+			diary1.getIsShared(),
+			diary1.getIsFavorite(),
 			diary1.getUser().getId());
 	}
 
@@ -143,7 +150,8 @@ public class DiaryService {
 			diary.getDiaryId(),
 			diary.getDiaryTitle(), diary.getSodaIndex(), diary.getContent(), diary.getPurpose(),
 			diary.getGptComment(),
-			diary.getCreatedAt(), diary.getUpdatedAt(), diary.getIsRepresentative(), diary.getBookmark(),
+			diary.getCreatedAt(), diary.getUpdatedAt(), diary.getIsRepresentative(), diary.getIsShared(),
+			diary.getIsFavorite(),
 			diary.getUser().getId()
 		)).toList();
 	}
@@ -156,7 +164,6 @@ public class DiaryService {
 	public void deleteDiary(CustomUserDetails customUserDetails, Long id) {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new RuntimeException("User not found"));
-
 
 		user.getDiaries().stream().map(Diary::getDiaryId).filter(diaryId -> diaryId.equals(id))
 			.findFirst().orElseThrow(() -> new RuntimeException("Diary not found"));
@@ -182,7 +189,8 @@ public class DiaryService {
 				diary.getCreatedAt(),
 				diary.getUpdatedAt(),
 				diary.getIsRepresentative(),
-				diary.getBookmark(),
+				diary.getIsShared(),
+				diary.getIsFavorite(),
 				diary.getUser().getId()))
 			.toList();
 	}
@@ -190,7 +198,7 @@ public class DiaryService {
 	@Transactional
 	public Diary toggleFavorite(Long userId, Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId)
-				.orElseThrow(() -> new RuntimeException("Diary not found"));
+			.orElseThrow(() -> new RuntimeException("Diary not found"));
 
 		if (!diary.getUser().getId().equals(userId)) {
 			throw new RuntimeException("User not authorized to modify this diary");
@@ -199,11 +207,11 @@ public class DiaryService {
 		diary.setIsFavorite(!diary.getIsFavorite());
 		return diaryRepository.save(diary);
 	}
+
 	@Transactional
 	public Diary toggleShared(Long userId, Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId)
-				.orElseThrow(() -> new RuntimeException("Diary not found"));
-
+			.orElseThrow(() -> new RuntimeException("Diary not found"));
 
 		if (!diary.getUser().getId().equals(userId)) {
 			throw new RuntimeException("User not authorized to modify this diary");
@@ -214,23 +222,44 @@ public class DiaryService {
 	}
 
 	@Transactional
-	public double getMonthlySodaIndex(Long userId, YearMonth yearMonth) {
-		LocalDate startDate = yearMonth.atDay(1);
-		LocalDate endDate = yearMonth.atEndOfMonth();
-		List<Diary> diaries = diaryRepository.findByUserIdAndDateRange(userId, startDate, endDate);
+	public Map<Integer, Double> getDailySodaIndexesForMonth(CustomUserDetails customUserDetails, YearMonth yearMonth) {
+		LocalDateTime startDate = yearMonth.atDay(1).atStartOfDay();
+		LocalDateTime endDate = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+		List<Diary> diaries = diaryRepository.findByUserIdAndCreatedAtBetween(customUserDetails.getId(), startDate, endDate)
+			.stream()
+			.filter(Diary::getIsRepresentative)
+			.collect(Collectors.toList());
 
+		// 날짜별로 sodaIndex 값을 그룹화하고, 대표 다이어리 항목의 sodaIndex 값만 반환합니다.
 		return diaries.stream()
-				.mapToDouble(Diary::getSodaIndex)
-				.average()
-				.orElse(0.0);
+			.collect(Collectors.groupingBy(
+				diary -> diary.getCreatedAt().getDayOfMonth(),
+				Collectors.averagingDouble(Diary::getSodaIndex) // 하루에 여러 개의 대표 항목이 있을 경우 평균값을 반환합니다.
+			));
 	}
-  
-	public List<DiaryResponse> getBookmarkDiaries(CustomUserDetails customUserDetails) {
+
+	@Transactional
+	public List<Integer> getMonthlyDiariesForYear(CustomUserDetails customUserDetails, Year year) {
+		List<Integer> yearlyDiaries = new ArrayList<>();
+
+		for (int month = 1; month <= 12; month++) {
+			YearMonth yearMonth = YearMonth.of(year.getValue(), month);
+			LocalDateTime startDate = yearMonth.atDay(1).atStartOfDay();
+			LocalDateTime endDate = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+			int monthlyDiaries = diaryRepository.findByUserIdAndCreatedAtBetween(
+				customUserDetails.getId(), startDate, endDate).size();
+			yearlyDiaries.add(monthlyDiaries);
+		}
+
+		return yearlyDiaries;
+	}
+
+	public List<DiaryResponse> getFavoriteDiaries(CustomUserDetails customUserDetails) {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new NotFoundException("User not found"));
 
-		List<DiaryResponse> diaryResponses = user.getDiaries().stream().map(diary -> {
-			if (diary.getBookmark()) {
+		return user.getDiaries().stream().map(diary -> {
+			if (diary.getIsFavorite()) {
 				return new DiaryResponse(
 					diary.getDiaryId(),
 					diary.getDiaryTitle(),
@@ -241,14 +270,13 @@ public class DiaryService {
 					diary.getCreatedAt(),
 					diary.getUpdatedAt(),
 					diary.getIsRepresentative(),
-					diary.getBookmark(),
+					diary.getIsFavorite(),
+					diary.getIsShared(),
 					diary.getUser().getId());
 			} else {
 				return null;
 			}
 		}).toList();
-
-		return diaryResponses;
 	}
 
 }

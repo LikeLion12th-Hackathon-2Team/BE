@@ -35,10 +35,9 @@ public class Diary {
 
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
-	private Boolean bookmark = false;
 	private Boolean isRepresentative;
-	private Boolean isFavorite;
-	private Boolean isShared;
+	private Boolean isFavorite=false;
+	private Boolean isShared=false;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")

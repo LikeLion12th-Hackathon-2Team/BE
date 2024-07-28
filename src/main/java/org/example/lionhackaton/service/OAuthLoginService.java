@@ -33,11 +33,17 @@ public class OAuthLoginService {
 
 		AuthTokens authTokens = authTokensGenerator.generate(userId);
 
-		RefreshToken refreshTokenEntity = new RefreshToken();
-		refreshTokenEntity.setToken(authTokens.getRefreshToken());
-		refreshTokenEntity.setUserId(userId);
-		refreshTokenRepository.save(refreshTokenEntity);
-
+		Optional<RefreshToken> byUserId = refreshTokenRepository.findByUserId(userId);
+		if(byUserId.isPresent()) {
+			RefreshToken refreshTokenEntity = byUserId.get();
+			refreshTokenEntity.setToken(authTokens.getRefreshToken());
+			refreshTokenRepository.save(refreshTokenEntity);
+		} else {
+			RefreshToken refreshTokenEntity = new RefreshToken();
+			refreshTokenEntity.setToken(authTokens.getRefreshToken());
+			refreshTokenEntity.setUserId(userId);
+			refreshTokenRepository.save(refreshTokenEntity);
+		}
 		return authTokens;
 	}
 
