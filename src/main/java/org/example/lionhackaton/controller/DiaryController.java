@@ -99,20 +99,20 @@ public class DiaryController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@PutMapping("/favorites/{userId}/{diaryId}")
-	public ResponseEntity<?> toggleFavorite(@PathVariable Long userId, @PathVariable Long diaryId) {
+	@PutMapping("/favorites/{diaryId}")
+	public ResponseEntity<?> toggleFavorite(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long diaryId) {
 		try {
-			Diary updatedDiary = diaryService.toggleFavorite(userId, diaryId);
+			DiaryResponse updatedDiary = diaryService.toggleFavorite(customUserDetails, diaryId);
 			return ResponseEntity.ok(updatedDiary);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
 	}
 
-	@PutMapping("/shared/{userId}/{diaryId}")
-	public ResponseEntity<?> toggleShared(@PathVariable Long userId, @PathVariable Long diaryId) {
+	@PutMapping("/shared/{diaryId}")
+	public ResponseEntity<?> toggleShared(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long diaryId) {
 		try {
-			Diary updatedDiary = diaryService.toggleShared(userId, diaryId);
+			DiaryResponse updatedDiary = diaryService.toggleShared(customUserDetails, diaryId);
 			return ResponseEntity.ok(updatedDiary);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -138,7 +138,7 @@ public class DiaryController {
 		@PathVariable int year) {
 		try {
 			Year y = Year.of(year);
-			List<Integer> diaries = diaryService.getMonthlyDiariesForYear(customUserDetails, y);
+			Map<Integer, Integer> diaries = diaryService.getMonthlyDiariesForYear(customUserDetails, y);
 			return ResponseEntity.ok(diaries);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

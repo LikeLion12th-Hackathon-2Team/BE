@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -196,29 +197,55 @@ public class DiaryService {
 	}
 
 	@Transactional
-	public Diary toggleFavorite(Long userId, Long diaryId) {
+	public DiaryResponse toggleFavorite(CustomUserDetails customUserDetails, Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new RuntimeException("Diary not found"));
 
-		if (!diary.getUser().getId().equals(userId)) {
+		if (!diary.getUser().getId().equals(customUserDetails.getId())) {
 			throw new RuntimeException("User not authorized to modify this diary");
 		}
 
 		diary.setIsFavorite(!diary.getIsFavorite());
-		return diaryRepository.save(diary);
+
+		Diary save = diaryRepository.save(diary);
+		return new DiaryResponse(save.getDiaryId(),
+			save.getDiaryTitle(),
+			save.getSodaIndex(),
+			save.getContent(),
+			save.getPurpose(),
+			save.getGptComment(),
+			save.getCreatedAt(),
+			save.getUpdatedAt(),
+			save.getIsRepresentative(),
+			save.getIsShared(),
+			save.getIsFavorite(),
+			save.getUser().getId());
 	}
 
 	@Transactional
-	public Diary toggleShared(Long userId, Long diaryId) {
+	public DiaryResponse toggleShared(CustomUserDetails customUserDetails, Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new RuntimeException("Diary not found"));
 
-		if (!diary.getUser().getId().equals(userId)) {
+		if (!diary.getUser().getId().equals(customUserDetails.getId())) {
 			throw new RuntimeException("User not authorized to modify this diary");
 		}
 
 		diary.setIsShared(!diary.getIsShared());
-		return diaryRepository.save(diary);
+
+		Diary save = diaryRepository.save(diary);
+		return new DiaryResponse(save.getDiaryId(),
+			save.getDiaryTitle(),
+			save.getSodaIndex(),
+			save.getContent(),
+			save.getPurpose(),
+			save.getGptComment(),
+			save.getCreatedAt(),
+			save.getUpdatedAt(),
+			save.getIsRepresentative(),
+			save.getIsShared(),
+			save.getIsFavorite(),
+			save.getUser().getId());
 	}
 
 	@Transactional
@@ -239,8 +266,8 @@ public class DiaryService {
 	}
 
 	@Transactional
-	public List<Integer> getMonthlyDiariesForYear(CustomUserDetails customUserDetails, Year year) {
-		List<Integer> yearlyDiaries = new ArrayList<>();
+	public Map<Integer, Integer> getMonthlyDiariesForYear(CustomUserDetails customUserDetails, Year year) {
+		Map<Integer, Integer> yearlyDiaries = new HashMap<>();
 
 		for (int month = 1; month <= 12; month++) {
 			YearMonth yearMonth = YearMonth.of(year.getValue(), month);
@@ -248,7 +275,7 @@ public class DiaryService {
 			LocalDateTime endDate = yearMonth.atEndOfMonth().atTime(23, 59, 59);
 			int monthlyDiaries = diaryRepository.findByUserIdAndCreatedAtBetween(
 				customUserDetails.getId(), startDate, endDate).size();
-			yearlyDiaries.add(monthlyDiaries);
+			yearlyDiaries.put(month, monthlyDiaries);
 		}
 
 		return yearlyDiaries;
