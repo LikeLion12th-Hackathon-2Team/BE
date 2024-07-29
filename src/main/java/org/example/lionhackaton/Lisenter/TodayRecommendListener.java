@@ -2,7 +2,6 @@ package org.example.lionhackaton.Lisenter;
 
 import java.time.LocalDateTime;
 
-import org.example.lionhackaton.domain.Diary;
 import org.example.lionhackaton.domain.TodayRecommend;
 
 import jakarta.persistence.PrePersist;

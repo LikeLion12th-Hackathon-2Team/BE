@@ -10,14 +10,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatGPTResponse {
-    private List<Choice> choices;
+	private List<Choice> choices;
 
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Choice {
-        private int index;
-        private Message message;
-    }
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class Choice {
+		private int index;
+		private Message message;
+	}
 }

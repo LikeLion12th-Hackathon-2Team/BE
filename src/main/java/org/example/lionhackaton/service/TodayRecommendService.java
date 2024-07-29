@@ -20,14 +20,12 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class TodayRecommendService {
 
-	@Value("${openai.model}")
-	private String model;
-
-	@Value("${openai.api.url}")
-	private String apiURL;
-
 	private final TodayRecommendRepository todayRecommendRepository;
 	private final RestTemplate template;
+	@Value("${openai.model}")
+	private String model;
+	@Value("${openai.api.url}")
+	private String apiURL;
 
 	public TodayRecommendService(TodayRecommendRepository todayRecommendRepository, RestTemplate template) {
 		this.todayRecommendRepository = todayRecommendRepository;

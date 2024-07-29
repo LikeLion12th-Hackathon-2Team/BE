@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import org.example.lionhackaton.Lisenter.CommentListener;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -37,6 +36,5 @@ public class Comment {
 	@ManyToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	private User user;
-
 
 }

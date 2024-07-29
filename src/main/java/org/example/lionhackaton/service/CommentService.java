@@ -24,7 +24,7 @@ public class CommentService {
 	private final UserService userService;
 
 	public CommentService(CommentRepository commentRepository, UserRepository userRepository,
-		DiaryRepository diaryRepository,UserService userService) {
+		DiaryRepository diaryRepository, UserService userService) {
 		this.commentRepository = commentRepository;
 		this.userRepository = userRepository;
 		this.diaryRepository = diaryRepository;
@@ -95,7 +95,6 @@ public class CommentService {
 		if (!comment.getUser().getId().equals(user.getId())) {
 			throw new AccessDeniedException("수정 권한이 없습니다");
 		}
-
 
 		comment.setContent(content);
 

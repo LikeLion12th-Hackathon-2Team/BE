@@ -2,7 +2,6 @@ package org.example.lionhackaton.controller;
 
 import java.util.List;
 
-import org.example.lionhackaton.domain.Comment;
 import org.example.lionhackaton.domain.dto.response.CommentResponse;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.service.CommentService;

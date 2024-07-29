@@ -7,6 +7,7 @@ import org.example.lionhackaton.domain.RefreshToken;
 import org.example.lionhackaton.domain.User;
 import org.example.lionhackaton.domain.oauth.AuthTokens;
 import org.example.lionhackaton.domain.oauth.AuthTokensGenerator;
+import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.domain.oauth.JwtTokenProvider;
 import org.example.lionhackaton.domain.oauth.interfaces.OAuthInfoResponse;
 import org.example.lionhackaton.domain.oauth.interfaces.OAuthLoginParams;
@@ -33,11 +34,17 @@ public class OAuthLoginService {
 
 		AuthTokens authTokens = authTokensGenerator.generate(userId);
 
-		RefreshToken refreshTokenEntity = new RefreshToken();
-		refreshTokenEntity.setToken(authTokens.getRefreshToken());
-		refreshTokenEntity.setUserId(userId);
-		refreshTokenRepository.save(refreshTokenEntity);
-
+		Optional<RefreshToken> byUserId = refreshTokenRepository.findByUserId(userId);
+		if (byUserId.isPresent()) {
+			RefreshToken refreshTokenEntity = byUserId.get();
+			refreshTokenEntity.setToken(authTokens.getRefreshToken());
+			refreshTokenRepository.save(refreshTokenEntity);
+		} else {
+			RefreshToken refreshTokenEntity = new RefreshToken();
+			refreshTokenEntity.setToken(authTokens.getRefreshToken());
+			refreshTokenEntity.setUserId(userId);
+			refreshTokenRepository.save(refreshTokenEntity);
+		}
 		return authTokens;
 	}
 
@@ -52,6 +59,9 @@ public class OAuthLoginService {
 			.email(oAuthInfoResponse.getEmail())
 			.nickname(oAuthInfoResponse.getNickname())
 			.oAuthProvider(oAuthInfoResponse.getOAuthProvider())
+			.dailyDiaryCount(1)
+			.dailyCommentCount(10)
+			.point(0L)
 			.build();
 
 		return userRepository.save(member).getId();
@@ -91,5 +101,10 @@ public class OAuthLoginService {
 
 	public void logout(Long userId) {
 		refreshTokenRepository.deleteByUserId(userId);
+	}
+
+	@Transactional
+	public void delete(CustomUserDetails customUserDetails) {
+		userRepository.deleteById(customUserDetails.getId());
 	}
 }

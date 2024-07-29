@@ -3,7 +3,6 @@ package org.example.lionhackaton.domain;
 import java.time.LocalDateTime;
 
 import org.example.lionhackaton.Lisenter.DiaryListener;
-import org.example.lionhackaton.domain.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,16 +34,16 @@ public class Diary {
 
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
-	private Boolean bookmark = false;
 	private Boolean isRepresentative;
-	private Boolean isFavorite;
-	private Boolean isShared;
+	private Boolean isFavorite = false;
+	private Boolean isShared = false;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	public Diary(String diaryTitle, Long sodaIndex, String content, String purpose, Boolean isRepresentative, User user) {
+	public Diary(String diaryTitle, Long sodaIndex, String content, String purpose, Boolean isRepresentative,
+		User user) {
 		this.diaryTitle = diaryTitle;
 		this.sodaIndex = sodaIndex;
 		this.content = content;
@@ -56,6 +55,5 @@ public class Diary {
 	public Diary() {
 
 	}
-
 
 }
