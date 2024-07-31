@@ -2,6 +2,7 @@ package org.example.lionhackaton.controller;
 
 import java.time.Year;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -128,6 +129,9 @@ public class DiaryController {
 		try {
 			YearMonth ym = YearMonth.parse(yearMonth);
 			Map<Integer, Double> dailyDiaries = diaryService.getDailySodaIndexesForMonth(customUserDetails, ym);
+			if (dailyDiaries.isEmpty()) {
+				return ResponseEntity.ok("null");
+			}
 			return ResponseEntity.ok(dailyDiaries);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -163,6 +167,13 @@ public class DiaryController {
 	public ResponseEntity<?> getSharedDiaries() {
 		try {
 			List<DiaryResponse> sharedDiaries = diaryService.getSharedDiaries();
+			if (sharedDiaries.isEmpty()) {
+				List<DiaryResponse> list = new ArrayList<>();
+				DiaryResponse diaryResponse = new DiaryResponse(null, null, null, null, null, null, null, null, null,
+					null, null, null);
+				list.add(diaryResponse);
+				return ResponseEntity.ok(list);
+			}
 			return ResponseEntity.ok().body(sharedDiaries);
 		} catch (NotFoundException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

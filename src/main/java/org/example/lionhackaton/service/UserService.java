@@ -112,4 +112,15 @@ public class UserService {
 		return user;
 	}
 
+	public Long donatePoint(CustomUserDetails customUserDetails){
+		User user = userRepository.findById(customUserDetails.getId())
+			.orElseThrow(() -> new NotFoundException("user를 찾지 못했습니다."));
+
+		if(user.getPoint() <= 10000){
+			throw new RuntimeException("기부 금액이 부족합니다.");
+		}
+
+		return (user.getPoint()/1000)*1000;
+	}
+
 }

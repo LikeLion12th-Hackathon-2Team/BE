@@ -1,5 +1,6 @@
 package org.example.lionhackaton.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.time.YearMonth;
@@ -68,6 +69,17 @@ public class DiaryService {
 		ResponseEntity<ChatGPTResponse> chatGPTResponse = template.exchange(apiURL, HttpMethod.POST, entity,
 			ChatGPTResponse.class);
 
+		LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+		LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
+
+		if (diaryRequest.getIsRepresentative()) {
+			List<Diary> representativeDiaries = diaryRepository.findAllByIsRepresentativeTrueAndCreatedAtBetween(startOfDay, endOfDay);
+			for (Diary diary : representativeDiaries) {
+				diary.setIsRepresentative(false);
+				diaryRepository.save(diary);
+			}
+		}
+
 		Diary diary = new Diary(
 			diaryRequest.getDiaryTitle(),
 			diaryRequest.getSodaIndex(),
@@ -80,6 +92,11 @@ public class DiaryService {
 			Objects.requireNonNull(chatGPTResponse.getBody()).getChoices().get(0).getMessage().getContent());
 
 		Diary save = diaryRepository.save(diary);
+
+		if (diaryRequest.getIsRepresentative()) {
+			diaryRepository.updateIsRepresentativeFalseByCreatedAtBetweenAndExcludeId(startOfDay, endOfDay, save.getDiaryId());
+		}
+
 		userService.plusDiaryPoint(customUserDetails);
 
 		return new DiaryResponse(save.getDiaryId(),
@@ -95,6 +112,8 @@ public class DiaryService {
 			save.getIsFavorite(),
 			save.getUser().getId());
 	}
+
+
 
 	private ChatGPTRequest getChatGPTRequest(DiaryRequest diaryRequest) {
 		String prompt = "[IMPORTANT] From now on, I will give all prompts in Korean. "
