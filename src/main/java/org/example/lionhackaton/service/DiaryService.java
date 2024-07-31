@@ -97,6 +97,11 @@ public class DiaryService {
 		Diary save = diaryRepository.save(diary);
 		userService.plusDiaryPoint(customUserDetails);
 
+		if (diaryRequest.getIsRepresentative()) {
+			diaryRepository.updateIsRepresentativeFalseByCreatedAtBetweenAndExcludeId(startOfDay, endOfDay,
+					save.getDiaryId());
+		}
+
 		return getDiaryResponse(save);
 	}
 
