@@ -1,5 +1,6 @@
 package org.example.lionhackaton.controller;
 
+import org.example.lionhackaton.domain.dto.response.PointResponse;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -27,10 +28,10 @@ public class UserController {
 	public ResponseEntity<?> getUserPoint(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		try {
-			Long point = userService.getPoint(customUserDetails);
+			PointResponse point = userService.getPoint(customUserDetails);
 			return ResponseEntity.ok(point);
 		} catch (NotFoundException e) {
-			return ResponseEntity.status(404).body("User not found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
@@ -47,20 +48,6 @@ public class UserController {
 			return ResponseEntity.status(404).body("User not found");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-		}
-	}
-
-	@GetMapping("/donate")
-	public ResponseEntity<?> donatePoint(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails
-	){
-		try{
-			Long point = userService.donatePoint(customUserDetails);
-			return ResponseEntity.ok(point);
-		}catch(NotFoundException e){
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		}catch(RuntimeException e){
-			return ResponseEntity.status(400).body(e.getMessage());
 		}
 	}
 }

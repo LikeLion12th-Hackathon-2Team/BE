@@ -28,8 +28,10 @@ public class User {
 	private String email;
 	private String nickname;
 	private Long point = 0L;
+	private Long donatePoint = 0L;
 	private int dailyDiaryCount = 1;
 	private int dailyCommentCount = 10;
+
 	@Enumerated(EnumType.STRING)
 	private OAuthProvider oAuthProvider;
 

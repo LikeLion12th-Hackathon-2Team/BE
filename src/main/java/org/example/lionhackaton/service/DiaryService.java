@@ -76,8 +76,7 @@ public class DiaryService {
 		LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
 
 		if (diaryRequest.getIsRepresentative()) {
-			List<Diary> representativeDiaries = diaryRepository.findAllByIsRepresentativeTrueAndCreatedAtBetween(
-				startOfDay, endOfDay);
+			List<Diary> representativeDiaries = diaryRepository.findAllByIsRepresentativeTrueAndCreatedAtBetween(startOfDay, endOfDay);
 			for (Diary diary : representativeDiaries) {
 				diary.setIsRepresentative(false);
 				diaryRepository.save(diary);
@@ -96,16 +95,17 @@ public class DiaryService {
 			Objects.requireNonNull(chatGPTResponse.getBody()).getChoices().get(0).getMessage().getContent());
 
 		Diary save = diaryRepository.save(diary);
+		userService.plusDiaryPoint(customUserDetails);
 
 		if (diaryRequest.getIsRepresentative()) {
 			diaryRepository.updateIsRepresentativeFalseByCreatedAtBetweenAndExcludeId(startOfDay, endOfDay,
-				save.getDiaryId());
+					save.getDiaryId());
 		}
-
-		userService.plusDiaryPoint(customUserDetails);
 
 		return getDiaryResponse(save);
 	}
+
+
 
 	private ChatGPTRequest getChatGPTRequest(DiaryRequest diaryRequest) {
 		String prompt = "[IMPORTANT] From now on, I will give all prompts in Korean. "

@@ -6,6 +6,7 @@ import java.util.List;
 import org.example.lionhackaton.domain.Comment;
 import org.example.lionhackaton.domain.Diary;
 import org.example.lionhackaton.domain.User;
+import org.example.lionhackaton.domain.dto.response.PointResponse;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.repository.UserRepository;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,10 +27,17 @@ public class UserService {
 		userRepository.saveAll(users.stream().map(this::resetUserCount).toList());
 	}
 
-	public Long getPoint(CustomUserDetails customUserDetails) {
+	public PointResponse getPoint(CustomUserDetails customUserDetails) {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new NotFoundException("User not found"));
-		return user.getPoint();
+
+		if(user.getPoint() >= 10000) {
+			Long donatePoint = (user.getPoint() / 1000) * 1000;
+			user.setDonatePoint(donatePoint);
+		}
+		User save = userRepository.save(user);
+
+		return new PointResponse(save.getPoint(), save.getDonatePoint());
 	}
 
 	public Long updatePoint(CustomUserDetails customUserDetails, Long points) {
@@ -110,17 +118,6 @@ public class UserService {
 		user.setDailyDiaryCount(1);
 		user.setDailyCommentCount(10);
 		return user;
-	}
-
-	public Long donatePoint(CustomUserDetails customUserDetails){
-		User user = userRepository.findById(customUserDetails.getId())
-			.orElseThrow(() -> new NotFoundException("user를 찾지 못했습니다."));
-
-		if(user.getPoint() <= 10000){
-			throw new RuntimeException("기부 금액이 부족합니다.");
-		}
-
-		return (user.getPoint()/1000)*1000;
 	}
 
 }
