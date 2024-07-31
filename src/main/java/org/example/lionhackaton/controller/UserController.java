@@ -49,4 +49,18 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
 	}
+
+	@GetMapping("/donate")
+	public ResponseEntity<?> donatePoint(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails
+	){
+		try{
+			Long point = userService.donatePoint(customUserDetails);
+			return ResponseEntity.ok(point);
+		}catch(NotFoundException e){
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		}catch(RuntimeException e){
+			return ResponseEntity.status(400).body(e.getMessage());
+		}
+	}
 }

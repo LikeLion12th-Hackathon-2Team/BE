@@ -37,15 +37,20 @@ public class DonateHistoryService {
 	}
 
 	public List<DonateHistoryResponse> getDonateHistory(CustomUserDetails customUserDetails) {
-		return donateHistoryRepository.findAllByUserId(customUserDetails.getId())
-			.stream()
-			.map(donateHistory -> new DonateHistoryResponse(
-				donateHistory.getDonateHistoryId(),
-				donateHistory.getPoint(),
-				donateHistory.getLocation(),
-				donateHistory.getUser().getId(),
-				donateHistory.getCreatedAt()
-			))
-			.toList();
+		List<DonateHistoryResponse> list = new java.util.ArrayList<>(
+			donateHistoryRepository.findAllByUserId(customUserDetails.getId())
+				.stream()
+				.map(donateHistory -> new DonateHistoryResponse(
+					donateHistory.getDonateHistoryId(),
+					donateHistory.getPoint(),
+					donateHistory.getLocation(),
+					donateHistory.getUser().getId(),
+					donateHistory.getCreatedAt()
+				))
+				.toList());
+		if(list.isEmpty()) {
+			list.add(new DonateHistoryResponse(null, null, null, null, null));
+		}
+		return list;
 	}
 }

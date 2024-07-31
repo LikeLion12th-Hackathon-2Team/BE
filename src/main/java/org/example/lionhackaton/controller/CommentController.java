@@ -1,5 +1,6 @@
 package org.example.lionhackaton.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.example.lionhackaton.domain.dto.response.CommentResponse;
@@ -49,6 +50,11 @@ public class CommentController {
 	) {
 		try {
 			List<CommentResponse> comment = commentService.getDiaryCommentById(diary_id);
+			if (comment.isEmpty()) {
+				List<CommentResponse> commentResponses = Collections.singletonList(
+					new CommentResponse(null, null, null, null, null, null, null));
+				return ResponseEntity.ok(commentResponses);
+			}
 			return ResponseEntity.ok().body(comment);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

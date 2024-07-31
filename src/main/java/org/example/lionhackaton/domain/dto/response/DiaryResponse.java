@@ -1,6 +1,7 @@
 package org.example.lionhackaton.domain.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,4 +23,5 @@ public class DiaryResponse {
 	private Boolean isShared;
 	private Boolean isFavorite;
 	private Long userId;
+	private List<CommentResponse> commentResponses;
 }
