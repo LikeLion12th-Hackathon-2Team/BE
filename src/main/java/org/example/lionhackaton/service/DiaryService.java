@@ -268,19 +268,32 @@ public class DiaryService {
 	public Map<Integer, Double> getDailySodaIndexesForMonth(CustomUserDetails customUserDetails, YearMonth yearMonth) {
 		LocalDateTime startDate = yearMonth.atDay(1).atStartOfDay();
 		LocalDateTime endDate = yearMonth.atEndOfMonth().atTime(23, 59, 59);
-		List<Diary> diaries = diaryRepository.findByUserIdAndCreatedAtBetween(customUserDetails.getId(), startDate,
-				endDate)
+		System.out.println("startDate = " + startDate);
+		System.out.println("endDate = " + endDate);
+
+		// 일기 가져오기
+		List<Diary> diaries = diaryRepository.findByUserIdAndCreatedAtBetween(customUserDetails.getId(), startDate, endDate)
 			.stream()
 			.filter(Diary::getIsRepresentative)
-			.collect(Collectors.toList());
+			.toList();
 
-		// 날짜별로 sodaIndex 값을 그룹화하고, 대표 다이어리 항목의 sodaIndex 값만 반환합니다.
-		return diaries.stream()
-			.collect(Collectors.groupingBy(
-				diary -> diary.getCreatedAt().getDayOfMonth(),
-				Collectors.averagingDouble(Diary::getSodaIndex) // 하루에 여러 개의 대표 항목이 있을 경우 평균값을 반환합니다.
-			));
+		// 일자별 sodaIndex 저장할 맵
+		Map<Integer, Double> sodaIndexes = new HashMap<>();
+
+		// 모든 날짜에 null 값 넣기
+		for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
+			sodaIndexes.put(day, null);
+		}
+
+		// 일기 날짜와 sodaIndex 매핑
+		diaries.forEach(diary -> {
+			int dayOfMonth = diary.getCreatedAt().getDayOfMonth();
+			sodaIndexes.put(dayOfMonth, diary.getSodaIndex().doubleValue());
+		});
+
+		return sodaIndexes;
 	}
+
 
 	@Transactional
 	public Map<Integer, Integer> getMonthlyDiariesForYear(CustomUserDetails customUserDetails, Year year) {
