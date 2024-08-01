@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.example.lionhackaton.domain.Diary;
 import org.example.lionhackaton.domain.dto.request.DiaryRequest;
 import org.example.lionhackaton.domain.dto.response.CommentResponse;
 import org.example.lionhackaton.domain.dto.response.DiaryResponse;
@@ -39,8 +38,8 @@ public class DiaryController {
 
 	@PostMapping
 	public ResponseEntity<?> createDiary(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@RequestBody DiaryRequest diary
+			@AuthenticationPrincipal CustomUserDetails customUserDetails,
+			@RequestBody DiaryRequest diary
 	) {
 		try {
 			DiaryResponse savedDiary = diaryService.saveDiary(customUserDetails, diary);
@@ -52,9 +51,9 @@ public class DiaryController {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<?> updateDiary(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@PathVariable Long id,
-		@RequestBody Diary diaryDetails
+			@AuthenticationPrincipal CustomUserDetails customUserDetails,
+			@PathVariable Long id,
+			@RequestBody DiaryRequest diaryDetails // 수정된 부분
 	) {
 		try {
 			DiaryResponse updatedDiary = diaryService.updateDiary(customUserDetails, id, diaryDetails);
@@ -72,7 +71,7 @@ public class DiaryController {
 
 	@GetMapping("/user")
 	public ResponseEntity<?> getUserAllDiaries(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails
+			@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
 		try {
 			List<DiaryResponse> diaries = diaryService.getUserAllDiaries(customUserDetails);
@@ -84,8 +83,8 @@ public class DiaryController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteDiary(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@PathVariable Long id
+			@AuthenticationPrincipal CustomUserDetails customUserDetails,
+			@PathVariable Long id
 	) {
 		diaryService.deleteDiary(customUserDetails, id);
 		return ResponseEntity.noContent().build();
@@ -93,7 +92,7 @@ public class DiaryController {
 
 	@PutMapping("/favorites/{diaryId}")
 	public ResponseEntity<?> toggleFavorite(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@PathVariable Long diaryId) {
+											@PathVariable Long diaryId) {
 		try {
 			DiaryResponse updatedDiary = diaryService.toggleFavorite(customUserDetails, diaryId);
 			return ResponseEntity.ok(updatedDiary);
@@ -104,7 +103,7 @@ public class DiaryController {
 
 	@PutMapping("/shared/{diaryId}")
 	public ResponseEntity<?> toggleShared(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@PathVariable Long diaryId) {
+										  @PathVariable Long diaryId) {
 		try {
 			DiaryResponse updatedDiary = diaryService.toggleShared(customUserDetails, diaryId);
 			return ResponseEntity.ok(updatedDiary);
@@ -115,8 +114,8 @@ public class DiaryController {
 
 	@GetMapping("/daily-diaries/{yearMonth}")
 	public ResponseEntity<?> getDailyDiaries(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@PathVariable String yearMonth) {
+			@AuthenticationPrincipal CustomUserDetails customUserDetails,
+			@PathVariable String yearMonth) {
 		try {
 			YearMonth ym = YearMonth.parse(yearMonth);
 			Map<Integer, Double> dailyDiaries = diaryService.getDailySodaIndexesForMonth(customUserDetails, ym);
@@ -131,8 +130,8 @@ public class DiaryController {
 
 	@GetMapping("/yearly-diaries/{year}")
 	public ResponseEntity<?> getYearlyDiaries(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@PathVariable int year) {
+			@AuthenticationPrincipal CustomUserDetails customUserDetails,
+			@PathVariable int year) {
 		try {
 			Year y = Year.of(year);
 			Map<Integer, Integer> diaries = diaryService.getMonthlyDiariesForYear(customUserDetails, y);
@@ -144,7 +143,7 @@ public class DiaryController {
 
 	@GetMapping("/favorites")
 	public ResponseEntity<?> getFavoriteDiaries(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails
+			@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
 		try {
 			List<DiaryResponse> favoriteDiaries = diaryService.getFavoriteDiaries(customUserDetails);
@@ -154,7 +153,7 @@ public class DiaryController {
 				CommentResponse commentResponse = new CommentResponse(null, null, null, null, null, null, null);
 				list2.add(commentResponse);
 				DiaryResponse diaryResponse = new DiaryResponse(null, null, null, null, null, null, null, null, null,
-					null, null, null, list2);
+						null, null, null, list2);
 				list.add(diaryResponse);
 				return ResponseEntity.ok(list);
 			}
@@ -174,7 +173,7 @@ public class DiaryController {
 				CommentResponse commentResponse = new CommentResponse(null, null, null, null, null, null, null);
 				list2.add(commentResponse);
 				DiaryResponse diaryResponse = new DiaryResponse(null, null, null, null, null, null, null, null, null,
-					null, null, null, list2);
+						null, null, null, list2);
 				list.add(diaryResponse);
 				return ResponseEntity.ok(list);
 			}
@@ -184,5 +183,3 @@ public class DiaryController {
 		}
 	}
 }
-
-
