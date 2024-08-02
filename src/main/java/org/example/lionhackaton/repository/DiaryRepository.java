@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.example.lionhackaton.domain.Diary;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,8 +19,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
 	List<Diary> findByIsShared(Boolean isShared);
 
-	@Query("SELECT d FROM Diary d WHERE d.isRepresentative = true AND d.diaryDate BETWEEN :startOfDay AND :endOfDay")
-	List<Diary> findAllByIsRepresentativeTrueAndDiaryDateBetween(LocalDateTime startOfDay, LocalDateTime endOfDay);
+	Optional<Diary> findByIsRepresentativeTrueAndDiaryDate(LocalDate diaryDate);
 
 	@Modifying
 	@Transactional
