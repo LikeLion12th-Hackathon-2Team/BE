@@ -1,5 +1,6 @@
 package org.example.lionhackaton.domain;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.example.lionhackaton.Lisenter.DiaryListener;
@@ -28,6 +29,7 @@ public class Diary {
 	private Long sodaIndex;
 	private String content;
 	private String purpose;
+	private LocalDate diaryDate;
 
 	@Column(columnDefinition = "LONGTEXT")
 	private String gptComment;
@@ -39,7 +41,7 @@ public class Diary {
 	private Boolean isShared = false;
 
 	public Diary(String diaryTitle, Long sodaIndex, String content, String purpose, Boolean isRepresentative,
-		Boolean isFavorite, Boolean isShared, User user) {
+		Boolean isFavorite, Boolean isShared,LocalDate diaryDate, User user) {
 		this.diaryTitle = diaryTitle;
 		this.sodaIndex = sodaIndex;
 		this.content = content;
@@ -47,6 +49,7 @@ public class Diary {
 		this.isRepresentative = isRepresentative;
 		this.isFavorite = isFavorite;
 		this.isShared = isShared;
+		this.diaryDate = diaryDate;
 		this.user = user;
 	}
 

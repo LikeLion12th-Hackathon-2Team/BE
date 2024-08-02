@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,4 +17,5 @@ public class DiaryRequest {
 	private Boolean isRepresentative;
 	private Boolean isFavorite;
 	private Boolean isShared;
+	private LocalDate diaryDate;
 }

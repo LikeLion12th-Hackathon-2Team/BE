@@ -1,5 +1,6 @@
 package org.example.lionhackaton.domain.dto.response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class DiaryResponse {
 	private String content;
 	private String purpose;
 	private String gptComment;
+	private LocalDate diaryDate;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private Boolean isRepresentative;
