@@ -99,6 +99,7 @@ public class OAuthLoginService {
 		return new AuthTokens(newAccessToken, newRefreshToken, "Bearer", 3600L);
 	}
 
+	@Transactional
 	public void logout(Long userId) {
 		refreshTokenRepository.deleteByUserId(userId);
 	}
