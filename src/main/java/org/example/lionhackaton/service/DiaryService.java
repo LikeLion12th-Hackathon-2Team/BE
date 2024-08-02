@@ -1,7 +1,6 @@
 package org.example.lionhackaton.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -72,15 +71,15 @@ public class DiaryService {
 		ResponseEntity<ChatGPTResponse> chatGPTResponse = template.exchange(apiURL, HttpMethod.POST, entity,
 			ChatGPTResponse.class);
 
-		LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-		LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
+		LocalDate startOfDay = diaryRequest.getDiaryDate();
 
 		if (diaryRequest.getIsRepresentative()) {
-			List<Diary> representativeDiaries = diaryRepository.findAllByIsRepresentativeTrueAndDiaryDateBetween(startOfDay,endOfDay);
-			for (Diary diary : representativeDiaries) {
-				diary.setIsRepresentative(false);
-				diaryRepository.save(diary);
-			}
+			diaryRepository.findByIsRepresentativeTrueAndDiaryDate(startOfDay).ifPresent(
+				diary -> {
+					diary.setIsRepresentative(false);
+					diaryRepository.save(diary);
+				}
+			);
 		}
 
 		Diary diary = new Diary(
@@ -99,11 +98,6 @@ public class DiaryService {
 
 		Diary save = diaryRepository.save(diary);
 		userService.plusDiaryPoint(customUserDetails);
-
-		if (diaryRequest.getIsRepresentative()) {
-			diaryRepository.updateIsRepresentativeFalseByDiaryDateBetweenAndExcludeId(startOfDay, endOfDay,
-					save.getDiaryId());
-		}
 
 		return getDiaryResponse(save);
 	}
@@ -162,7 +156,7 @@ public class DiaryService {
 		return new DiaryResponse(
 			diary.getDiaryId(),
 			diary.getDiaryTitle(), diary.getSodaIndex(), diary.getContent(), diary.getPurpose(),
-			diary.getGptComment(),diary.getDiaryDate(),
+			diary.getGptComment(), diary.getDiaryDate(),
 			diary.getCreatedAt(), diary.getUpdatedAt(), diary.getIsRepresentative(), diary.getIsShared(),
 			diary.getIsFavorite(),
 			diary.getUser().getId(),
@@ -294,10 +288,7 @@ public class DiaryService {
 	public Map<Integer, Double> getDailySodaIndexesForMonth(CustomUserDetails customUserDetails, YearMonth yearMonth) {
 		LocalDate startDate = yearMonth.atDay(1);
 		LocalDate endDate = yearMonth.atEndOfMonth();
-		System.out.println("startDate = " + startDate);
-		System.out.println("endDate = " + endDate);
 
-		// 일기 가져오기
 		List<Diary> diaries = diaryRepository.findByUserIdAndDiaryDateBetween(customUserDetails.getId(), startDate,
 				endDate)
 			.stream()
@@ -342,7 +333,7 @@ public class DiaryService {
 			.orElseThrow(() -> new NotFoundException("User not found"));
 
 		return user.getDiaries().stream()
-			.filter(Diary::getIsFavorite) // Favorite인 항목만 필터링
+			.filter(Diary::getIsFavorite)
 			.map(diary -> {
 				List<CommentResponse> list = new ArrayList<>(commentRepository.findByDiary_DiaryId(diary.getDiaryId())
 					.stream()
@@ -412,41 +403,41 @@ public class DiaryService {
 		return sharedDiariesResponse;
 	}
 
-	public List<DiaryResponse> getUserDailyDiaries(CustomUserDetails customUserDetails, LocalDate date){
+	public List<DiaryResponse> getUserDailyDiaries(CustomUserDetails customUserDetails, LocalDate date) {
 		User user = userRepository.findById(customUserDetails.getId())
-				.orElseThrow(() -> new NotFoundException("User not found"));
+			.orElseThrow(() -> new NotFoundException("User not found"));
 
 		return user.getDiaries().stream()
-				.filter(diary -> diary.getDiaryDate().equals(date))
-				.map(diary -> {
-					List<CommentResponse> list = new ArrayList<>(commentRepository.findByDiary_DiaryId(diary.getDiaryId())
-							.stream()
-							.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(),
-									comment.getIsChosen(),
-									comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-									comment.getUser().getId()))
-							.toList());
+			.filter(diary -> diary.getDiaryDate().equals(date))
+			.map(diary -> {
+				List<CommentResponse> list = new ArrayList<>(commentRepository.findByDiary_DiaryId(diary.getDiaryId())
+					.stream()
+					.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(),
+						comment.getIsChosen(),
+						comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
+						comment.getUser().getId()))
+					.toList());
 
-					if (list.isEmpty()) {
-						list.add(new CommentResponse(null, null, null, null, null, null, null));
-					}
+				if (list.isEmpty()) {
+					list.add(new CommentResponse(null, null, null, null, null, null, null));
+				}
 
-					return new DiaryResponse(
-							diary.getDiaryId(),
-							diary.getDiaryTitle(),
-							diary.getSodaIndex(),
-							diary.getContent(),
-							diary.getPurpose(),
-							diary.getGptComment(),
-							diary.getDiaryDate(),
-							diary.getCreatedAt(),
-							diary.getUpdatedAt(),
-							diary.getIsRepresentative(),
-							diary.getIsFavorite(),
-							diary.getIsShared(),
-							diary.getUser().getId(),
-							list);
-				})
-				.toList();
+				return new DiaryResponse(
+					diary.getDiaryId(),
+					diary.getDiaryTitle(),
+					diary.getSodaIndex(),
+					diary.getContent(),
+					diary.getPurpose(),
+					diary.getGptComment(),
+					diary.getDiaryDate(),
+					diary.getCreatedAt(),
+					diary.getUpdatedAt(),
+					diary.getIsRepresentative(),
+					diary.getIsFavorite(),
+					diary.getIsShared(),
+					diary.getUser().getId(),
+					list);
+			})
+			.toList();
 	}
 }
