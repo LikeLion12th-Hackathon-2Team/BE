@@ -38,19 +38,21 @@ public class Diary {
 	private Boolean isFavorite = false;
 	private Boolean isShared = false;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id")
-	private User user;
-
 	public Diary(String diaryTitle, Long sodaIndex, String content, String purpose, Boolean isRepresentative,
-		User user) {
+		Boolean isFavorite, Boolean isShared, User user) {
 		this.diaryTitle = diaryTitle;
 		this.sodaIndex = sodaIndex;
 		this.content = content;
 		this.purpose = purpose;
 		this.isRepresentative = isRepresentative;
+		this.isFavorite = isFavorite;
+		this.isShared = isShared;
 		this.user = user;
 	}
+
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
 
 	public Diary() {
 

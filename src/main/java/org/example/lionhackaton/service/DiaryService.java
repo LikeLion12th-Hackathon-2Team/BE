@@ -76,7 +76,8 @@ public class DiaryService {
 		LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
 
 		if (diaryRequest.getIsRepresentative()) {
-			List<Diary> representativeDiaries = diaryRepository.findAllByIsRepresentativeTrueAndCreatedAtBetween(startOfDay, endOfDay);
+			List<Diary> representativeDiaries = diaryRepository.findAllByIsRepresentativeTrueAndCreatedAtBetween(
+				startOfDay, endOfDay);
 			for (Diary diary : representativeDiaries) {
 				diary.setIsRepresentative(false);
 				diaryRepository.save(diary);
@@ -89,6 +90,8 @@ public class DiaryService {
 			diaryRequest.getContent(),
 			diaryRequest.getPurpose(),
 			diaryRequest.getIsRepresentative(),
+			diaryRequest.getIsFavorite(),
+			diaryRequest.getIsShared(),
 			user);
 
 		diary.setGptComment(
@@ -99,13 +102,11 @@ public class DiaryService {
 
 		if (diaryRequest.getIsRepresentative()) {
 			diaryRepository.updateIsRepresentativeFalseByCreatedAtBetweenAndExcludeId(startOfDay, endOfDay,
-					save.getDiaryId());
+				save.getDiaryId());
 		}
 
 		return getDiaryResponse(save);
 	}
-
-
 
 	private ChatGPTRequest getChatGPTRequest(DiaryRequest diaryRequest) {
 		String prompt = "[IMPORTANT] From now on, I will give all prompts in Korean. "
@@ -369,7 +370,6 @@ public class DiaryService {
 			})
 			.toList();
 	}
-
 
 	public List<DiaryResponse> getSharedDiaries() {
 		List<Diary> sharedDiaries = diaryRepository.findByIsShared(true);
