@@ -251,7 +251,6 @@ public class DiaryService {
 		}
 
 		diary.setIsShared(!diary.getIsShared());
-
 		Diary save = diaryRepository.save(diary);
 
 		List<CommentResponse> list = commentRepository.findByDiary_DiaryId(save.getDiaryId())
