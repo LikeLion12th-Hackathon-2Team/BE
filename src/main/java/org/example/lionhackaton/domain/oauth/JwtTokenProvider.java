@@ -3,7 +3,6 @@ package org.example.lionhackaton.domain.oauth;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -37,10 +36,19 @@ public class JwtTokenProvider {
 		try {
 			Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
 			return true;
-		} catch (JwtException | IllegalArgumentException e) {
-			return false;
+		} catch (ExpiredJwtException e) {
+			throw new ExpiredJwtException(null, e.getClaims(), "Token expired", e);
+		} catch (UnsupportedJwtException e) {
+			throw new UnsupportedJwtException("Unsupported JWT: " + e.getMessage(), e);
+		} catch (MalformedJwtException e) {
+			throw new MalformedJwtException("Malformed JWT: " + e.getMessage(), e);
+		} catch (SignatureException e) {
+			throw new SignatureException("Invalid JWT signature: " + e.getMessage(), e);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Illegal argument: " + e.getMessage(), e);
 		}
 	}
+
 
 	private Claims parseClaims(String accessToken) {
 		try {
@@ -51,6 +59,15 @@ public class JwtTokenProvider {
 				.getBody();
 		} catch (ExpiredJwtException e) {
 			return e.getClaims();
+		}
+	}
+
+	public boolean isTokenExpired(String token) {
+		try {
+			Claims claims = parseClaims(token);
+			return claims.getExpiration().before(new Date());
+		} catch (ExpiredJwtException e) {
+			return true;
 		}
 	}
 }

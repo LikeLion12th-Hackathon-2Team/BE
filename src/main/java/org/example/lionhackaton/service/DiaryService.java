@@ -16,6 +16,7 @@ import org.example.lionhackaton.domain.User;
 import org.example.lionhackaton.domain.dto.request.DiaryRequest;
 import org.example.lionhackaton.domain.dto.response.CommentResponse;
 import org.example.lionhackaton.domain.dto.response.DiaryResponse;
+import org.example.lionhackaton.domain.dto.response.MonthSodaResponse;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.repository.CommentRepository;
 import org.example.lionhackaton.repository.DiaryRepository;
@@ -59,7 +60,6 @@ public class DiaryService {
 
 	@Transactional
 	public DiaryResponse saveDiary(CustomUserDetails customUserDetails, DiaryRequest diaryRequest) {
-
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -83,6 +83,11 @@ public class DiaryService {
 					diaryRepository.save(diary);
 				}
 			);
+		}
+
+		if (!diaryRequest.getPurpose().equals("red") && !diaryRequest.getPurpose().equals("yellow")
+			&& !diaryRequest.getPurpose().equals("blue") && !diaryRequest.getPurpose().equals("green")) {
+			throw new RuntimeException("Purpose must be one of 'red', 'yellow', 'blue', 'green'");
 		}
 
 		Diary diary = new Diary(
@@ -117,7 +122,7 @@ public class DiaryService {
 	}
 
 	@Transactional
-	public DiaryResponse updateDiary(CustomUserDetails customUserDetails, Long id, Diary diaryDetails) {
+	public DiaryResponse updateDiary(CustomUserDetails customUserDetails, Long id, DiaryRequest diaryDetails) {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -125,42 +130,45 @@ public class DiaryService {
 			.findFirst().orElseThrow(() -> new RuntimeException("Diary not found"));
 
 		Diary diary1 = diaryRepository.findById(id).map(diary -> {
-			diary.setDiaryTitle(diaryDetails.getDiaryTitle());
-			diary.setSodaIndex(diaryDetails.getSodaIndex());
-			diary.setContent(diaryDetails.getContent());
-			diary.setPurpose(diaryDetails.getPurpose());
-			diary.setGptComment(diaryDetails.getGptComment());
-			diary.setDiaryDate(diaryDetails.getDiaryDate());
-			diary.setCreatedAt(diaryDetails.getCreatedAt());
-			diary.setUpdatedAt(diaryDetails.getUpdatedAt());
-			diary.setIsRepresentative(diaryDetails.getIsRepresentative());
+			diary.setDiaryTitle(
+				(diaryDetails.getDiaryTitle() != null ? diaryDetails.getDiaryTitle() : diary.getDiaryTitle()));
+			diary.setSodaIndex(
+				(diaryDetails.getSodaIndex() != null ? diaryDetails.getSodaIndex() : diary.getSodaIndex()));
+			diary.setContent((diaryDetails.getContent() != null ? diaryDetails.getContent() : diary.getContent()));
+			diary.setPurpose((diaryDetails.getPurpose() != null ? diaryDetails.getPurpose() : diary.getPurpose()));
+			diary.setDiaryDate(
+				(diaryDetails.getDiaryDate() != null ? diaryDetails.getDiaryDate() : diary.getDiaryDate()));
+			diary.setIsRepresentative((diaryDetails.getIsRepresentative() != null ? diaryDetails.getIsRepresentative() :
+				diary.getIsRepresentative()));
 			return diaryRepository.save(diary);
 		}).orElseThrow(() -> new RuntimeException("Diary not found"));
 
 		return getDiaryResponse(user, diary1);
 	}
+
 	public List<DiaryResponse> getAllDiaries(CustomUserDetails customUserDetails) {
 		User user = userRepository.findById(customUserDetails.getId())
-				.orElseThrow(() -> new RuntimeException("User not found"));
+			.orElseThrow(() -> new RuntimeException("User not found"));
 
 		return diaryRepository.findAll().stream()
-				.map(diary -> getDiaryResponse(user, diary))
-				.toList();
+			.map(diary -> getDiaryResponse(user, diary))
+			.toList();
 	}
+
 	private DiaryResponse getDiaryResponse(User user, Diary diary) {
 		List<CommentResponse> list = new ArrayList<>(commentRepository.findByDiary_DiaryId(diary.getDiaryId())
-				.stream()
-				.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(), comment.getIsChosen(),
-						comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-						comment.getUser().getId(), comment.getNickname(), commentService.updateButton(user, comment.getCommentId()),
-						commentService.deleteButton(user,diary.getDiaryId(), comment.getCommentId()),
-						commentService.chooseButton(user,diary.getDiaryId())))
-				.toList());
+			.stream()
+			.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(), comment.getIsChosen(),
+				comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
+				comment.getUser().getId(), comment.getNickname(),
+				commentService.updateButton(user, comment.getCommentId()),
+				commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
+				commentService.chooseButton(user, diary.getDiaryId())))
+			.toList());
 
 		if (list.isEmpty()) {
 			list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));
 		}
-
 
 		return new DiaryResponse(
 			diary.getDiaryId(),
@@ -184,7 +192,7 @@ public class DiaryService {
 		Diary diary = diaryRepository.findById(id).orElseThrow(() -> new NotFoundException("diary not found"));
 
 		userService.minusDiaryPoint(customUserDetails, diary);
-		diaryRepository.deleteById(id);
+		diaryRepository.deleteByDiaryId(id);
 	}
 
 	public List<DiaryResponse> getUserAllDiaries(CustomUserDetails customUserDetails) {
@@ -200,13 +208,13 @@ public class DiaryService {
 								comment.getIsChosen(),
 								comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
 								comment.getUser().getId(), comment.getNickname()
-									, commentService.updateButton(user, comment.getCommentId()),
-									commentService.deleteButton(user,diary.getDiaryId(), comment.getCommentId()),
-									commentService.chooseButton(user,diary.getDiaryId())))
+								, commentService.updateButton(user, comment.getCommentId()),
+								commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
+								commentService.chooseButton(user, diary.getDiaryId())))
 							.toList());
 
 					if (list.isEmpty()) {
-						list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null,null));
+						list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));
 					}
 
 					return new DiaryResponse(
@@ -233,7 +241,7 @@ public class DiaryService {
 	@Transactional
 	public DiaryResponse toggleFavorite(CustomUserDetails customUserDetails, Long diaryId) {
 		User user = userRepository.findById(customUserDetails.getId())
-				.orElseThrow(() -> new RuntimeException("User not found"));
+			.orElseThrow(() -> new RuntimeException("User not found"));
 
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new RuntimeException("Diary not found"));
@@ -250,9 +258,10 @@ public class DiaryService {
 			.stream()
 			.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(), comment.getIsChosen(),
 				comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-				comment.getUser().getId(), comment.getNickname(),commentService.updateButton(user, comment.getCommentId()),
-					commentService.deleteButton(user,diary.getDiaryId(), comment.getCommentId()),
-					commentService.chooseButton(user,diary.getDiaryId())))
+				comment.getUser().getId(), comment.getNickname(),
+				commentService.updateButton(user, comment.getCommentId()),
+				commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
+				commentService.chooseButton(user, diary.getDiaryId())))
 			.toList());
 
 		return getDiaryResponse(save, list);
@@ -261,7 +270,7 @@ public class DiaryService {
 	@Transactional
 	public DiaryResponse toggleShared(CustomUserDetails customUserDetails, Long diaryId) {
 		User user = userRepository.findById(customUserDetails.getId())
-				.orElseThrow(() -> new RuntimeException("User not found"));
+			.orElseThrow(() -> new RuntimeException("User not found"));
 
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() -> new RuntimeException("Diary not found"));
@@ -271,16 +280,16 @@ public class DiaryService {
 		}
 
 		diary.setIsShared(!diary.getIsShared());
-
 		Diary save = diaryRepository.save(diary);
 
 		List<CommentResponse> list = commentRepository.findByDiary_DiaryId(save.getDiaryId())
 			.stream()
 			.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(), comment.getIsChosen(),
 				comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-				comment.getUser().getId(), comment.getNickname(),commentService.updateButton(user, comment.getCommentId()),
-					commentService.deleteButton(user,diary.getDiaryId(), comment.getCommentId()),
-					commentService.chooseButton(user,diary.getDiaryId())))
+				comment.getUser().getId(), comment.getNickname(),
+				commentService.updateButton(user, comment.getCommentId()),
+				commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
+				commentService.chooseButton(user, diary.getDiaryId())))
 			.toList();
 
 		return getDiaryResponse(save, list);
@@ -288,7 +297,7 @@ public class DiaryService {
 
 	private DiaryResponse getDiaryResponse(Diary save, List<CommentResponse> list) {
 		if (list.isEmpty()) {
-			list.add(new CommentResponse(null,null,null,null, null, null, null, null, null, null, null));
+			list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));
 		}
 
 		return new DiaryResponse(save.getDiaryId(),
@@ -307,7 +316,8 @@ public class DiaryService {
 	}
 
 	@Transactional
-	public Map<Integer, Double> getDailySodaIndexesForMonth(CustomUserDetails customUserDetails, YearMonth yearMonth) {
+	public Map<Integer, MonthSodaResponse> getDailySodaIndexesForMonth(CustomUserDetails customUserDetails,
+		YearMonth yearMonth) {
 		LocalDate startDate = yearMonth.atDay(1);
 		LocalDate endDate = yearMonth.atEndOfMonth();
 
@@ -317,18 +327,16 @@ public class DiaryService {
 			.filter(Diary::getIsRepresentative)
 			.toList();
 
-		// 일자별 sodaIndex 저장할 맵
-		Map<Integer, Double> sodaIndexes = new HashMap<>();
+		Map<Integer, MonthSodaResponse> sodaIndexes = new HashMap<>();
 
-		// 모든 날짜에 null 값 넣기
 		for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
-			sodaIndexes.put(day, null);
+			sodaIndexes.put(day, new MonthSodaResponse("null", null));
 		}
 
-		// 일기 날짜와 sodaIndex 매핑
 		diaries.forEach(diary -> {
 			int dayOfMonth = diary.getDiaryDate().getDayOfMonth();
-			sodaIndexes.put(dayOfMonth, diary.getSodaIndex().doubleValue());
+			sodaIndexes.put(dayOfMonth, new MonthSodaResponse(
+				diary.getPurpose(), diary.getSodaIndex()));
 		});
 
 		return sodaIndexes;
@@ -362,13 +370,14 @@ public class DiaryService {
 					.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(),
 						comment.getIsChosen(),
 						comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-						comment.getUser().getId(), comment.getNickname(),commentService.updateButton(user, comment.getCommentId()),
-							commentService.deleteButton(user,diary.getDiaryId(), comment.getCommentId()),
-							commentService.chooseButton(user,diary.getDiaryId())))
+						comment.getUser().getId(), comment.getNickname(),
+						commentService.updateButton(user, comment.getCommentId()),
+						commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
+						commentService.chooseButton(user, diary.getDiaryId())))
 					.toList());
 
 				if (list.isEmpty()) {
-					list.add(new CommentResponse(null,null,null,null, null, null, null, null, null, null, null));
+					list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));
 				}
 
 				return new DiaryResponse(
@@ -392,7 +401,7 @@ public class DiaryService {
 
 	public List<DiaryResponse> getSharedDiaries(CustomUserDetails customUserDetails) {
 		User user = userRepository.findById(customUserDetails.getId())
-				.orElseThrow(() -> new NotFoundException("User not found"));
+			.orElseThrow(() -> new NotFoundException("User not found"));
 
 		List<Diary> sharedDiaries = diaryRepository.findByIsShared(true);
 		List<DiaryResponse> sharedDiariesResponse = new ArrayList<>();
@@ -402,13 +411,14 @@ public class DiaryService {
 				.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(),
 					comment.getIsChosen(),
 					comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-					comment.getUser().getId(), comment.getNickname(),commentService.updateButton(user, comment.getCommentId()),
-						commentService.deleteButton(user,diary.getDiaryId(), comment.getCommentId()),
-						commentService.chooseButton(user,diary.getDiaryId())))
+					comment.getUser().getId(), comment.getNickname(),
+					commentService.updateButton(user, comment.getCommentId()),
+					commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
+					commentService.chooseButton(user, diary.getDiaryId())))
 				.toList());
 
 			if (list.isEmpty()) {
-				list.add(new CommentResponse(null, null, null, null, null, null, null, null,null,null,null));
+				list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));
 			}
 
 			sharedDiariesResponse.add(new DiaryResponse(
@@ -444,13 +454,14 @@ public class DiaryService {
 					.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(),
 						comment.getIsChosen(),
 						comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-						comment.getUser().getId(), comment.getNickname(),commentService.updateButton(user, comment.getCommentId()),
-							commentService.deleteButton(user,diary.getDiaryId(), comment.getCommentId()),
-							commentService.chooseButton(user,diary.getDiaryId())))
+						comment.getUser().getId(), comment.getNickname(),
+						commentService.updateButton(user, comment.getCommentId()),
+						commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
+						commentService.chooseButton(user, diary.getDiaryId())))
 					.toList());
 
 				if (list.isEmpty()) {
-					list.add(new CommentResponse(null,null,null,null, null, null, null, null, null, null, null));
+					list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));
 				}
 
 				return new DiaryResponse(

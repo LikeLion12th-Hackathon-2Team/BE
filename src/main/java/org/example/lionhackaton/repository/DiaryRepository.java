@@ -10,21 +10,18 @@ import org.example.lionhackaton.domain.Diary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
-	List<Diary> findByUserIdAndIsFavoriteTrue(Long userId);
-
-	List<Diary> findByUserIdAndCreatedAtBetween(Long userId, LocalDateTime startDate, LocalDateTime endDate);
+	@Modifying
+	@Transactional
+	@Query("DELETE FROM Diary d WHERE d.diaryId = :diaryId")
+	void deleteByDiaryId(@Param("diaryId") Long diaryId);
 
 	List<Diary> findByIsShared(Boolean isShared);
 
 	Optional<Diary> findByIsRepresentativeTrueAndDiaryDate(LocalDate diaryDate);
-
-	@Modifying
-	@Transactional
-	@Query("UPDATE Diary d SET d.isRepresentative = false WHERE d.diaryDate BETWEEN :startOfDay AND :endOfDay AND d.diaryId != :excludeId")
-	void updateIsRepresentativeFalseByDiaryDateBetweenAndExcludeId(LocalDateTime startOfDay, LocalDateTime endOfDay, Long excludeId);
 
 	List<Diary> findByUserIdAndDiaryDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 
