@@ -5,6 +5,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class CustomUserDetails implements UserDetails {
 
 	private final Long id;
@@ -15,10 +20,6 @@ public class CustomUserDetails implements UserDetails {
 		this.id = id;
 		this.username = username;
 		this.authorities = authorities;
-	}
-
-	public Long getId() {
-		return id;
 	}
 
 	@Override
@@ -33,8 +34,7 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public String getPassword() {
-		return null; // Password는 사용하지 않으므로 null로 처리
-
+		return null;
 	}
 
 	@Override
