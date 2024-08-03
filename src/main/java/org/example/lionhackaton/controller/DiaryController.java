@@ -58,8 +58,8 @@ public class DiaryController {
 	}
 
 	@GetMapping
-	public ResponseEntity<?> getAllDiaries() {
-		List<DiaryResponse> allDiaries = diaryService.getAllDiaries();
+	public ResponseEntity<?> getAllDiaries(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		List<DiaryResponse> allDiaries = diaryService.getAllDiaries(customUserDetails);
 		return ResponseEntity.ok().body(allDiaries);
 	}
 
@@ -145,7 +145,7 @@ public class DiaryController {
 			if (favoriteDiaries.isEmpty()) {
 				List<DiaryResponse> list = new ArrayList<>();
 				List<CommentResponse> list2 = new ArrayList<>();
-				CommentResponse commentResponse = new CommentResponse(null, null, null, null, null, null, null);
+				CommentResponse commentResponse = new CommentResponse(null,null,null,null, null, null, null, null, null, null, null);
 				list2.add(commentResponse);
 				DiaryResponse diaryResponse = new DiaryResponse(null, null, null, null, null, null, null, null, null,
 						null, null, null, null, list2);
@@ -159,13 +159,15 @@ public class DiaryController {
 	}
 
 	@GetMapping("/shared")
-	public ResponseEntity<?> getSharedDiaries() {
+	public ResponseEntity<?> getSharedDiaries(
+			@AuthenticationPrincipal CustomUserDetails customUserDetails
+	) {
 		try {
-			List<DiaryResponse> sharedDiaries = diaryService.getSharedDiaries();
+			List<DiaryResponse> sharedDiaries = diaryService.getSharedDiaries(customUserDetails);
 			if (sharedDiaries.isEmpty()) {
 				List<DiaryResponse> list = new ArrayList<>();
 				List<CommentResponse> list2 = new ArrayList<>();
-				CommentResponse commentResponse = new CommentResponse(null, null, null, null, null, null, null);
+				CommentResponse commentResponse = new CommentResponse(null,null,null,null, null, null, null, null, null, null,null);
 				list2.add(commentResponse);
 				DiaryResponse diaryResponse = new DiaryResponse(null, null, null, null, null, null, null, null, null,
 						null, null, null, null, list2);
@@ -188,7 +190,7 @@ public class DiaryController {
 			if (dailyDiaries.isEmpty()) {
 				List<DiaryResponse> list = new ArrayList<>();
 				List<CommentResponse> list2 = new ArrayList<>();
-				CommentResponse commentResponse = new CommentResponse(null, null, null, null, null, null, null);
+				CommentResponse commentResponse = new CommentResponse(null,null,null,null,null, null, null, null, null, null, null);
 				list2.add(commentResponse);
 				DiaryResponse diaryResponse = new DiaryResponse(null, null, null, null, null, null, null, null, null,
 						null, null, null, null, list2);
