@@ -23,11 +23,11 @@ public class Comment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long commentId;
-
 	private String content;
 	private Boolean isChosen;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	private String nickname;
 
 	@ManyToOne
 	@JoinColumn(name = "diary_id", referencedColumnName = "diaryId")

@@ -46,13 +46,14 @@ public class CommentController {
 
 	@GetMapping
 	public ResponseEntity<?> getDiaryComment(
-		@PathVariable("id") Long diary_id
+		@PathVariable("id") Long diary_id,
+		@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
 		try {
-			List<CommentResponse> comment = commentService.getDiaryCommentById(diary_id);
+			List<CommentResponse> comment = commentService.getDiaryCommentById(diary_id, customUserDetails);
 			if (comment.isEmpty()) {
 				List<CommentResponse> commentResponses = Collections.singletonList(
-					new CommentResponse(null, null, null, null, null, null, null));
+					new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));
 				return ResponseEntity.ok(commentResponses);
 			}
 			return ResponseEntity.ok().body(comment);
@@ -64,10 +65,11 @@ public class CommentController {
 	@GetMapping("/{comment_id}")
 	public ResponseEntity<?> getComment(
 		@PathVariable("id") Long id,
-		@PathVariable("comment_id") Long comment_id
+		@PathVariable("comment_id") Long comment_id,
+		@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
 		try {
-			CommentResponse comment = commentService.getCommentById(id, comment_id);
+			CommentResponse comment = commentService.getCommentById(id, comment_id, customUserDetails);
 			return ResponseEntity.ok().body(comment);
 		} catch (NotFoundException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -77,10 +79,11 @@ public class CommentController {
 	@PutMapping("/{comment_id}/update")
 	public ResponseEntity<?> updateComment(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable("id") Long id,
 		@PathVariable("comment_id") Long comment_id,
 		@RequestParam("content") String content) {
 		try {
-			CommentResponse updatedComment = commentService.updateComment(customUserDetails, comment_id, content);
+			CommentResponse updatedComment = commentService.updateComment(customUserDetails, id, comment_id, content);
 			return ResponseEntity.status(HttpStatus.OK).body(updatedComment);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
