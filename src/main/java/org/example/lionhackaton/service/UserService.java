@@ -30,14 +30,11 @@ public class UserService {
 	public PointResponse getPoint(CustomUserDetails customUserDetails) {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new NotFoundException("User not found"));
-
-		if(user.getPoint() >= 10000) {
-			Long donatePoint = (user.getPoint() / 1000) * 1000;
-			user.setDonatePoint(donatePoint);
+		Long donatePoint = 0L;
+		if (user.getPoint() >= 10000) {
+			donatePoint = (user.getPoint() / 1000) * 1000;
 		}
-		User save = userRepository.save(user);
-
-		return new PointResponse(save.getPoint(), save.getDonatePoint());
+		return new PointResponse(user.getPoint(), donatePoint);
 	}
 
 	public Long updatePoint(CustomUserDetails customUserDetails, Long points) {

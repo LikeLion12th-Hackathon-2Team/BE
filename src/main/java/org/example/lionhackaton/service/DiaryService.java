@@ -63,28 +63,22 @@ public class DiaryService {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
-		ChatGPTRequest chatGPTRequest = getChatGPTRequest(diaryRequest);
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Bearer " + "sk-None-L1NGcSKoHf6WQyw1rFJoT3BlbkFJXw1grS2f76lqjp5b6ZEJ");
-
-		HttpEntity<ChatGPTRequest> entity = new HttpEntity<>(chatGPTRequest, headers);
-
-		ResponseEntity<ChatGPTResponse> chatGPTResponse = template.exchange(apiURL, HttpMethod.POST, entity,
-			ChatGPTResponse.class);
-
+		getGptComment(diaryRequest.getContent());
+		if (diaryRequest.getDiaryDate() != null) {
+			diaryRequest.setDiaryDate(LocalDate.now());
+		}
 		LocalDate startOfDay = diaryRequest.getDiaryDate();
 
 		if (diaryRequest.getIsRepresentative()) {
-			diaryRepository.findByIsRepresentativeTrueAndDiaryDate(startOfDay).ifPresent(
-				diary -> {
-					diary.setIsRepresentative(false);
-					diaryRepository.save(diary);
-				}
-			);
+			diaryRepository.findByIsRepresentativeTrueAndDiaryDateAndUserId(startOfDay, customUserDetails.getId())
+				.ifPresent(
+					diary -> {
+						diary.setIsRepresentative(false);
+						diaryRepository.save(diary);
+					}
+				);
 		} else {
-			if(diaryRepository.findAllByDiaryDateAndUserId(startOfDay, customUserDetails.getId()).isEmpty()) {
+			if (diaryRepository.findAllByDiaryDateAndUserId(startOfDay, customUserDetails.getId()).isEmpty()) {
 				diaryRequest.setIsRepresentative(true);
 			}
 		}
@@ -105,8 +99,7 @@ public class DiaryService {
 			diaryRequest.getDiaryDate(),
 			user);
 
-		diary.setGptComment(
-			Objects.requireNonNull(chatGPTResponse.getBody()).getChoices().get(0).getMessage().getContent());
+		diary.setGptComment(getGptComment(diaryRequest.getContent()));
 
 		Diary save = diaryRepository.save(diary);
 		userService.plusDiaryPoint(customUserDetails);
@@ -114,13 +107,28 @@ public class DiaryService {
 		return getDiaryResponse(user, save);
 	}
 
-	private ChatGPTRequest getChatGPTRequest(DiaryRequest diaryRequest) {
+	private String getGptComment(String content) {
+		ChatGPTRequest chatGPTRequest = getChatGPTRequest(content);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + "sk-None-L1NGcSKoHf6WQyw1rFJoT3BlbkFJXw1grS2f76lqjp5b6ZEJ");
+
+		HttpEntity<ChatGPTRequest> entity = new HttpEntity<>(chatGPTRequest, headers);
+
+		ResponseEntity<ChatGPTResponse> chatGPTResponse = template.exchange(apiURL, HttpMethod.POST, entity,
+			ChatGPTResponse.class);
+
+		return Objects.requireNonNull(chatGPTResponse.getBody()).getChoices().get(0).getMessage().getContent();
+	}
+
+	private ChatGPTRequest getChatGPTRequest(String content) {
 		String prompt = "[IMPORTANT] From now on, I will give all prompts in Korean. "
 			+ "이제부터 너는 내가 일기를 쓰면, 그 일기를 읽고 자존감을 불어주는 역할을 하는 상담 전문가야. "
 			+ "만약 내가 '오늘 시험을 못봐서 우울해'라고 적으면 너는 '그깟 시험 내가 못봐도 훨씬 잘살수있고 괜찮아!!' 이런식으로 적어주면 되는거야. "
 			+ "3줄 정도로 간결하게 적어주고"
 			+ "Temperature = 0.9, Top-p = 0.5, Tone = warm, Writing-style = converstaional"
-			+ "이제 내가 일기의 본문을 보여줄게 \n" + diaryRequest.getContent();
+			+ "이제 내가 일기의 본문을 보여줄게 \n" + content;
 
 		return new ChatGPTRequest(model, prompt);
 	}
@@ -138,10 +146,22 @@ public class DiaryService {
 				(diaryDetails.getDiaryTitle() != null) ? diaryDetails.getDiaryTitle() : diary.getDiaryTitle());
 			diary.setSodaIndex(
 				(diaryDetails.getSodaIndex() != null) ? diaryDetails.getSodaIndex() : diary.getSodaIndex());
+			if (diaryDetails.getContent() != null) {
+				diary.setGptComment(getGptComment(diaryDetails.getContent()));
+			}
 			diary.setContent((diaryDetails.getContent() != null) ? diaryDetails.getContent() : diary.getContent());
 			diary.setPurpose((diaryDetails.getPurpose() != null) ? diaryDetails.getPurpose() : diary.getPurpose());
 			diary.setDiaryDate(
 				(diaryDetails.getDiaryDate() != null) ? diaryDetails.getDiaryDate() : diary.getDiaryDate());
+			if (diaryDetails.getIsRepresentative() != null && !diaryDetails.getIsRepresentative()) {
+				diaryRepository.findAllByDiaryDateAndUserId(diary.getDiaryDate(), user.getId()).stream()
+					.filter(d -> !d.getIsRepresentative())
+					.findFirst()
+					.ifPresent(diary2 -> {
+						diary2.setIsRepresentative(true);
+						diaryRepository.save(diary2);
+					});
+			}
 			diary.setIsRepresentative(
 				(diaryDetails.getIsRepresentative() != null) ? diaryDetails.getIsRepresentative() :
 					diary.getIsRepresentative());
@@ -404,23 +424,24 @@ public class DiaryService {
 			.toList();
 	}
 
-	public List<DiaryResponse> getSharedDiaries(CustomUserDetails customUserDetails) {
-		User user = userRepository.findById(customUserDetails.getId())
-			.orElseThrow(() -> new NotFoundException("User not found"));
-
+	public List<DiaryResponse> getSharedDiaries() {
 		List<Diary> sharedDiaries = diaryRepository.findByIsShared(true);
 		List<DiaryResponse> sharedDiariesResponse = new ArrayList<>();
 		for (Diary diary : sharedDiaries) {
-			List<CommentResponse> list = new ArrayList<>(commentRepository.findByDiary_DiaryId(diary.getDiaryId())
-				.stream()
-				.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(),
+			List<CommentResponse> list = new ArrayList<>(
+				diary.getComments().stream().map(comment -> new CommentResponse(
+					comment.getCommentId(),
+					comment.getContent(),
 					comment.getIsChosen(),
-					comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-					comment.getUser().getId(), comment.getNickname(),
-					commentService.updateButton(user, comment.getCommentId()),
-					commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
-					commentService.chooseButton(user, diary.getDiaryId())))
-				.toList());
+					comment.getCreatedAt(),
+					comment.getUpdatedAt(),
+					comment.getDiary().getDiaryId(),
+					comment.getUser().getId(),
+					comment.getNickname(),
+					commentService.updateButton(diary.getUser(), comment.getCommentId()),
+					commentService.deleteButton(diary.getUser(), diary.getDiaryId(), comment.getCommentId()),
+					commentService.chooseButton(diary.getUser(), diary.getDiaryId())
+				)).toList());
 
 			if (list.isEmpty()) {
 				list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));
