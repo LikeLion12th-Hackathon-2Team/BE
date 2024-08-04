@@ -131,15 +131,16 @@ public class DiaryService {
 
 		Diary diary1 = diaryRepository.findById(id).map(diary -> {
 			diary.setDiaryTitle(
-				(diaryDetails.getDiaryTitle() != null ? diaryDetails.getDiaryTitle() : diary.getDiaryTitle()));
+				(diaryDetails.getDiaryTitle() != null) ? diaryDetails.getDiaryTitle() : diary.getDiaryTitle());
 			diary.setSodaIndex(
-				(diaryDetails.getSodaIndex() != null ? diaryDetails.getSodaIndex() : diary.getSodaIndex()));
-			diary.setContent((diaryDetails.getContent() != null ? diaryDetails.getContent() : diary.getContent()));
-			diary.setPurpose((diaryDetails.getPurpose() != null ? diaryDetails.getPurpose() : diary.getPurpose()));
+				(diaryDetails.getSodaIndex() != null) ? diaryDetails.getSodaIndex() : diary.getSodaIndex());
+			diary.setContent((diaryDetails.getContent() != null) ? diaryDetails.getContent() : diary.getContent());
+			diary.setPurpose((diaryDetails.getPurpose() != null) ? diaryDetails.getPurpose() : diary.getPurpose());
 			diary.setDiaryDate(
-				(diaryDetails.getDiaryDate() != null ? diaryDetails.getDiaryDate() : diary.getDiaryDate()));
-			diary.setIsRepresentative((diaryDetails.getIsRepresentative() != null ? diaryDetails.getIsRepresentative() :
-				diary.getIsRepresentative()));
+				(diaryDetails.getDiaryDate() != null) ? diaryDetails.getDiaryDate() : diary.getDiaryDate());
+			diary.setIsRepresentative(
+				(diaryDetails.getIsRepresentative() != null) ? diaryDetails.getIsRepresentative() :
+					diary.getIsRepresentative());
 			return diaryRepository.save(diary);
 		}).orElseThrow(() -> new RuntimeException("Diary not found"));
 
