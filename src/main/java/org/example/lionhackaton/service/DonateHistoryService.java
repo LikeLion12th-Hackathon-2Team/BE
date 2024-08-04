@@ -48,7 +48,7 @@ public class DonateHistoryService {
 					donateHistory.getCreatedAt()
 				))
 				.toList());
-		if(list.isEmpty()) {
+		if (list.isEmpty()) {
 			list.add(new DonateHistoryResponse(null, null, null, null, null));
 		}
 		return list;
