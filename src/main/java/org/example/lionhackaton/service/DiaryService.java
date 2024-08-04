@@ -83,6 +83,10 @@ public class DiaryService {
 					diaryRepository.save(diary);
 				}
 			);
+		} else {
+			if(diaryRepository.findAllByDiaryDateAndUserId(startOfDay, customUserDetails.getId()).isEmpty()) {
+				diaryRequest.setIsRepresentative(true);
+			}
 		}
 
 		if (!diaryRequest.getPurpose().equals("red") && !diaryRequest.getPurpose().equals("yellow")

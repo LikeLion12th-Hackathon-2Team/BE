@@ -23,6 +23,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
 	Optional<Diary> findByIsRepresentativeTrueAndDiaryDate(LocalDate diaryDate);
 
+	List<Diary> findAllByDiaryDateAndUserId(LocalDate diaryDate, Long userId);
+
 	List<Diary> findByUserIdAndDiaryDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 
 }
