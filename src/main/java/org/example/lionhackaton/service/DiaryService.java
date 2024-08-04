@@ -70,12 +70,13 @@ public class DiaryService {
 		LocalDate startOfDay = diaryRequest.getDiaryDate();
 
 		if (diaryRequest.getIsRepresentative()) {
-			diaryRepository.findByIsRepresentativeTrueAndDiaryDate(startOfDay).ifPresent(
-				diary -> {
-					diary.setIsRepresentative(false);
-					diaryRepository.save(diary);
-				}
-			);
+			diaryRepository.findByIsRepresentativeTrueAndDiaryDateAndUserId(startOfDay, customUserDetails.getId())
+				.ifPresent(
+					diary -> {
+						diary.setIsRepresentative(false);
+						diaryRepository.save(diary);
+					}
+				);
 		} else {
 			if (diaryRepository.findAllByDiaryDateAndUserId(startOfDay, customUserDetails.getId()).isEmpty()) {
 				diaryRequest.setIsRepresentative(true);

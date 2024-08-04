@@ -21,7 +21,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
 	List<Diary> findByIsShared(Boolean isShared);
 
-	Optional<Diary> findByIsRepresentativeTrueAndDiaryDate(LocalDate diaryDate);
+	Optional<Diary> findByIsRepresentativeTrueAndDiaryDateAndUserId(LocalDate diaryDate, Long userId);
 
 	List<Diary> findAllByDiaryDateAndUserId(LocalDate diaryDate, Long userId);
 
