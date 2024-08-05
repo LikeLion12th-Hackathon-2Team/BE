@@ -173,10 +173,11 @@ public class DiaryController {
 	}
 
 	@GetMapping("/shared")
-	public ResponseEntity<?> getSharedDiaries(
+	public ResponseEntity<?> getSharedDiaries(@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
 		try {
-			List<DiaryResponse> sharedDiaries = diaryService.getSharedDiaries();
+			List<DiaryResponse> sharedDiaries = diaryService.getSharedDiaries(customUserDetails);
+
 			if (sharedDiaries.isEmpty()) {
 				List<DiaryResponse> list = new ArrayList<>();
 				List<CommentResponse> list2 = new ArrayList<>();

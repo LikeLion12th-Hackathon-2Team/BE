@@ -209,8 +209,8 @@ public class BatchConfig {
 		String prompt =
 			"I'll show you my diary. It's a diary between small quotes.  diary = '" + diaryContent
 				+ "' From now on, you have to look at the diary up there and recommend a product or exercise that fits that diary. [IMPORTANT] Write down the answer in 3 lines\n"
-				+ "[IMPORTANT] Don't write anything other than 4 lines.\n"
-				+ "Write it down in honorifics. I'll give you a diary, read it and recommend a product that fits your diary. If it says \"랜덤 추천\" you can just randomly recommend a product. Find and recommend the most popular exercise or product in Korea recently. In the first line, you can write down the merits of the product, the description of the product, and where the product is good. In the second line, you can write down why you recommended it in your diary, and if you don't have a diary, you can just write it down randomly because there was no diary you wrote yesterday. And in the end, you can write down your support. I believe you will write it down well. Temperature = 0.9, Top-p = 0.5, Tone = warm, Writing-style = conversational"
+				+ "[IMPORTANT] Don't write anything other than 7 lines.\n"
+				+ "Write it down in honorifics. I'll give you a diary, read it and recommend a product that fits your diary. If it says \"랜덤 추천\" you can just randomly recommend a product. Find and recommend the most popular exercise or product in Korea recently. In the first/second line, you can write down the merits of the product, the description of the product, and where the product is good. In the third/fourth line, you can write down why you recommended it in your diary, and if you don't have a diary, you can just write it down randomly because there was no diary you wrote yesterday. And in the end, you can write down your support. I believe you will write it down well. Temperature = 0.9, Top-p = 0.5, Tone = warm, Writing-style = conversational"
 				+ "[IMPORTANT] DO not say any words except 3lines such as diaryContent or title or 다이어리 : , And say the result in Korean.";
 
 		return new ChatGPTRequest(model, prompt);

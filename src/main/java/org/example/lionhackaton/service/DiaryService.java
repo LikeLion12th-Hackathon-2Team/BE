@@ -165,6 +165,13 @@ public class DiaryService {
 			diary.setIsRepresentative(
 				(diaryDetails.getIsRepresentative() != null) ? diaryDetails.getIsRepresentative() :
 					diary.getIsRepresentative());
+			diary.setIsFavorite(
+				(diaryDetails.getIsFavorite() != null) ? diaryDetails.getIsFavorite() :
+					diary.getIsFavorite());
+			diary.setIsShared(
+				(diaryDetails.getIsShared() != null) ? diaryDetails.getIsShared() :
+					diary.getIsShared());
+
 			return diaryRepository.save(diary);
 		}).orElseThrow(() -> new RuntimeException("Diary not found"));
 
@@ -424,24 +431,23 @@ public class DiaryService {
 			.toList();
 	}
 
-	public List<DiaryResponse> getSharedDiaries() {
+	public List<DiaryResponse> getSharedDiaries(CustomUserDetails customUserDetails) {
+		User user = userRepository.findById(customUserDetails.getId())
+			.orElseThrow(() -> new NotFoundException("User not found"));
+
 		List<Diary> sharedDiaries = diaryRepository.findByIsShared(true);
 		List<DiaryResponse> sharedDiariesResponse = new ArrayList<>();
 		for (Diary diary : sharedDiaries) {
-			List<CommentResponse> list = new ArrayList<>(
-				diary.getComments().stream().map(comment -> new CommentResponse(
-					comment.getCommentId(),
-					comment.getContent(),
+			List<CommentResponse> list = new ArrayList<>(commentRepository.findByDiary_DiaryId(diary.getDiaryId())
+				.stream()
+				.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(),
 					comment.getIsChosen(),
-					comment.getCreatedAt(),
-					comment.getUpdatedAt(),
-					comment.getDiary().getDiaryId(),
-					comment.getUser().getId(),
-					comment.getNickname(),
-					commentService.updateButton(diary.getUser(), comment.getCommentId()),
-					commentService.deleteButton(diary.getUser(), diary.getDiaryId(), comment.getCommentId()),
-					commentService.chooseButton(diary.getUser(), diary.getDiaryId())
-				)).toList());
+					comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
+					comment.getUser().getId(), comment.getNickname(),
+					commentService.updateButton(user, comment.getCommentId()),
+					commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
+					commentService.chooseButton(user, diary.getDiaryId())))
+				.toList());
 
 			if (list.isEmpty()) {
 				list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));

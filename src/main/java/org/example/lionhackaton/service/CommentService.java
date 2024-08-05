@@ -6,6 +6,7 @@ import java.util.List;
 import org.example.lionhackaton.domain.Comment;
 import org.example.lionhackaton.domain.Diary;
 import org.example.lionhackaton.domain.User;
+import org.example.lionhackaton.domain.dto.request.CommentRequest;
 import org.example.lionhackaton.domain.dto.response.CommentResponse;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.repository.CommentRepository;
@@ -32,13 +33,14 @@ public class CommentService {
 	}
 
 	@Transactional
-	public CommentResponse saveComment(CustomUserDetails customUserDetails, String content, Long diary_id) {
+	public CommentResponse saveComment(CustomUserDetails customUserDetails, CommentRequest commentRequest) {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new NotFoundException("유저를 발견하지 못했습니다."));
-		Diary diary = diaryRepository.findById(diary_id).orElseThrow(() -> new NotFoundException("diary를 발견하지 못했습니다."));
-
+		Diary diary = diaryRepository.findById(commentRequest.getDiaryId())
+			.orElseThrow(() -> new NotFoundException("diary를 발견하지 못했습니다."));
+		System.out.println("commentRequest = " + commentRequest.getContent());
 		Comment comment = new Comment();
-		comment.setContent(content);
+		comment.setContent(commentRequest.getContent());
 		comment.setIsChosen(false);
 		comment.setUser(user);
 		comment.setDiary(diary);
@@ -55,12 +57,13 @@ public class CommentService {
 			save.getUpdatedAt(),
 			save.getDiary().getDiaryId(),
 			save.getUser().getId(),
-			save.getNickname(),true,true,false);
+			save.getNickname(),
+			true, true, false);
 	}
 
 	public List<CommentResponse> getDiaryCommentById(Long diary_id, CustomUserDetails customUserDetails) {
 		User user = userRepository.findById(customUserDetails.getId())
-				.orElseThrow(() -> new NotFoundException("유저를 발견하지 못했습니다."));
+			.orElseThrow(() -> new NotFoundException("유저를 발견하지 못했습니다."));
 
 		return commentRepository.findByDiary_DiaryId(diary_id).stream().map(comment -> new CommentResponse(
 			comment.getCommentId(),
@@ -69,14 +72,14 @@ public class CommentService {
 			comment.getCreatedAt(),
 			comment.getUpdatedAt(),
 			comment.getDiary().getDiaryId(),
-			comment.getUser().getId(),comment.getNickname(),
-			updateButton(user,comment.getCommentId()), deleteButton(user,diary_id, comment.getCommentId())
-			,chooseButton(user,diary_id))).toList();
+			comment.getUser().getId(), comment.getNickname(),
+			updateButton(user, comment.getCommentId()), deleteButton(user, diary_id, comment.getCommentId())
+			, chooseButton(user, diary_id))).toList();
 	}
 
 	public CommentResponse getCommentById(Long id, Long comment_id, CustomUserDetails customUserDetails) {
 		User user = userRepository.findById(customUserDetails.getId())
-				.orElseThrow(() -> new NotFoundException("유저를 발견하지 못했습니다."));
+			.orElseThrow(() -> new NotFoundException("유저를 발견하지 못했습니다."));
 
 		Diary diary = diaryRepository.findById(id).orElseThrow(() -> new NotFoundException("diary를 찾지 못했습니다."));
 		commentRepository.findByDiary_DiaryId(diary.getDiaryId()).stream().map(Comment::getCommentId)
@@ -87,12 +90,14 @@ public class CommentService {
 			.orElseThrow(() -> new NotFoundException("comment를 찾지 못했습니다."));
 
 		return new CommentResponse(comment.getCommentId(), comment.getContent(), comment.getIsChosen(),
-			comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(), comment.getUser().getId(), comment.getNickname(),
-				updateButton(user,comment.getCommentId()), deleteButton(user,id, comment.getCommentId())
-				,chooseButton(user,id));
+			comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(), comment.getUser().getId(),
+			comment.getNickname(),
+			updateButton(user, comment.getCommentId()), deleteButton(user, id, comment.getCommentId())
+			, chooseButton(user, id));
 	}
 
-	public CommentResponse updateComment(CustomUserDetails customUserDetails,Long id, Long comment_id, String content){
+	public CommentResponse updateComment(CustomUserDetails customUserDetails, Long id, Long comment_id,
+		String content) {
 		Comment comment = commentRepository.findById(comment_id)
 			.orElseThrow(() -> new NotFoundException("comment를 찾지못했습니다."));
 
@@ -103,14 +108,13 @@ public class CommentService {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new NotFoundException("user를 찾지 못했습니다."));
 
-
 		comment.setContent(content);
 
 		Comment save = commentRepository.save(comment);
 		return new CommentResponse(save.getCommentId(), save.getContent(), save.getIsChosen(), save.getCreatedAt(),
 			save.getUpdatedAt(), save.getDiary().getDiaryId(), save.getUser().getId(), save.getNickname(),
-				updateButton(user,comment.getCommentId()), deleteButton(user,id, comment.getCommentId())
-				,chooseButton(user,id));
+			updateButton(user, comment.getCommentId()), deleteButton(user, id, comment.getCommentId())
+			, chooseButton(user, id));
 	}
 
 	public CommentResponse chooseComment(CustomUserDetails customUserDetails, Long comment_id, Long diary_id) throws
@@ -122,7 +126,6 @@ public class CommentService {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new NotFoundException("user를 찾지 못했습니다."));
 
-
 		if (comment.getUser().getId().equals(user.getId())) {
 			throw new AccessDeniedException("자신의 댓글은 채택할 수 없습니다");
 		}
@@ -133,8 +136,8 @@ public class CommentService {
 		Comment save = commentRepository.save(comment);
 		return new CommentResponse(save.getCommentId(), save.getContent(), save.getIsChosen(), save.getCreatedAt(),
 			save.getUpdatedAt(), save.getDiary().getDiaryId(), save.getUser().getId(), save.getNickname(),
-				updateButton(user,comment.getCommentId()), deleteButton(user,diary_id, comment.getCommentId())
-				,chooseButton(user,diary_id));
+			updateButton(user, comment.getCommentId()), deleteButton(user, diary_id, comment.getCommentId())
+			, chooseButton(user, diary_id));
 	}
 
 	@Transactional
@@ -150,21 +153,20 @@ public class CommentService {
 
 	public boolean updateButton(User user, Long commentId) {
 		Comment comment = commentRepository.findById(commentId)
-				.orElseThrow(() -> new NotFoundException("comment를 찾지못했습니다."));
+			.orElseThrow(() -> new NotFoundException("comment를 찾지못했습니다."));
 
 		return user.getId().equals(comment.getUser().getId());
 	}
 
-	public boolean deleteButton(User user,Long diaryId, Long commentId) {
+	public boolean deleteButton(User user, Long diaryId, Long commentId) {
 		Comment comment = commentRepository.findById(commentId)
-				.orElseThrow(() -> new NotFoundException("comment를 찾지못했습니다."));
+			.orElseThrow(() -> new NotFoundException("comment를 찾지못했습니다."));
 
 		Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new NotFoundException("diary를 찾지 못했습니다."));
 
 		return user.getId().equals(comment.getUser().getId())
-				|| user.getId().equals(diary.getUser().getId());
+			|| user.getId().equals(diary.getUser().getId());
 	}
-
 
 	public boolean chooseButton(User user, Long diaryId) {
 		Diary diary = diaryRepository.findById(diaryId).orElseThrow(() -> new NotFoundException("diary를 찾지 못했습니다."));
