@@ -64,7 +64,7 @@ public class DiaryService {
 			.orElseThrow(() -> new RuntimeException("User not found"));
 
 		getGptComment(diaryRequest.getContent());
-		if (diaryRequest.getDiaryDate() != null) {
+		if (diaryRequest.getDiaryDate() == null) {
 			diaryRequest.setDiaryDate(LocalDate.now());
 		}
 		LocalDate startOfDay = diaryRequest.getDiaryDate();
@@ -153,6 +153,7 @@ public class DiaryService {
 			diary.setPurpose((diaryDetails.getPurpose() != null) ? diaryDetails.getPurpose() : diary.getPurpose());
 			diary.setDiaryDate(
 				(diaryDetails.getDiaryDate() != null) ? diaryDetails.getDiaryDate() : diary.getDiaryDate());
+
 			if (diaryDetails.getIsRepresentative() != null && !diaryDetails.getIsRepresentative()) {
 				diaryRepository.findAllByDiaryDateAndUserId(diary.getDiaryDate(), user.getId()).stream()
 					.filter(d -> !d.getIsRepresentative())
@@ -161,6 +162,17 @@ public class DiaryService {
 						diary2.setIsRepresentative(true);
 						diaryRepository.save(diary2);
 					});
+			}
+			if (Boolean.TRUE.equals(diaryDetails.getIsRepresentative())) {
+				diaryRepository.findByIsRepresentativeTrueAndDiaryDateAndUserId(
+						diaryDetails.getDiaryDate() == null ? diary.getDiaryDate() : diaryDetails.getDiaryDate(),
+						customUserDetails.getId())
+					.ifPresent(
+						diary2 -> {
+							diary2.setIsRepresentative(false);
+							diaryRepository.save(diary2);
+						}
+					);
 			}
 			diary.setIsRepresentative(
 				(diaryDetails.getIsRepresentative() != null) ? diaryDetails.getIsRepresentative() :

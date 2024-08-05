@@ -6,7 +6,9 @@ import java.util.List;
 import org.example.lionhackaton.domain.Comment;
 import org.example.lionhackaton.domain.Diary;
 import org.example.lionhackaton.domain.User;
+import org.example.lionhackaton.domain.dto.request.CommentChooseRequest;
 import org.example.lionhackaton.domain.dto.request.CommentRequest;
+import org.example.lionhackaton.domain.dto.request.CommentUpdateRequest;
 import org.example.lionhackaton.domain.dto.response.CommentResponse;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.repository.CommentRepository;
@@ -14,6 +16,7 @@ import org.example.lionhackaton.repository.DiaryRepository;
 import org.example.lionhackaton.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.webjars.NotFoundException;
 
 @Service
@@ -96,9 +99,10 @@ public class CommentService {
 			, chooseButton(user, id));
 	}
 
-	public CommentResponse updateComment(CustomUserDetails customUserDetails, Long id, Long comment_id,
-		String content) {
-		Comment comment = commentRepository.findById(comment_id)
+	@CrossOrigin("*")
+	public CommentResponse updateComment(CustomUserDetails customUserDetails,
+		CommentUpdateRequest commentUpdateRequest) {
+		Comment comment = commentRepository.findById(commentUpdateRequest.getCommentId())
 			.orElseThrow(() -> new NotFoundException("comment를 찾지못했습니다."));
 
 		if (!diaryRepository.existsById(comment.getDiary().getDiaryId())) {
@@ -108,21 +112,34 @@ public class CommentService {
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new NotFoundException("user를 찾지 못했습니다."));
 
-		comment.setContent(content);
-
+		comment.setContent(commentUpdateRequest.getContent());
 		Comment save = commentRepository.save(comment);
-		return new CommentResponse(save.getCommentId(), save.getContent(), save.getIsChosen(), save.getCreatedAt(),
-			save.getUpdatedAt(), save.getDiary().getDiaryId(), save.getUser().getId(), save.getNickname(),
-			updateButton(user, comment.getCommentId()), deleteButton(user, id, comment.getCommentId())
-			, chooseButton(user, id));
+
+		return new CommentResponse(
+			save.getCommentId(),
+			save.getContent(),
+			save.getIsChosen(),
+			save.getCreatedAt(),
+			save.getUpdatedAt(),
+			save.getDiary().getDiaryId(),
+			save.getUser().getId(),
+			save.getNickname(),
+			updateButton(user, comment.getCommentId()),
+			deleteButton(user, commentUpdateRequest.getDiaryId(), comment.getCommentId()),
+			chooseButton(user, commentUpdateRequest.getDiaryId())
+		);
 	}
 
-	public CommentResponse chooseComment(CustomUserDetails customUserDetails, Long comment_id, Long diary_id) throws
+	public CommentResponse chooseComment(CustomUserDetails customUserDetails,
+		CommentChooseRequest commentChooseRequest) throws
 		AccessDeniedException {
 
-		Comment comment = commentRepository.findById(comment_id)
+		Comment comment = commentRepository.findById(commentChooseRequest.getCommentId())
 			.orElseThrow(() -> new NotFoundException("comment를 찾지못했습니다."));
-		Diary diary = diaryRepository.findById(diary_id).orElseThrow(() -> new NotFoundException("diary를 찾지 못했습니다."));
+
+		diaryRepository.findById(commentChooseRequest.getDiaryId())
+			.orElseThrow(() -> new NotFoundException("diary를 찾지 못했습니다."));
+
 		User user = userRepository.findById(customUserDetails.getId())
 			.orElseThrow(() -> new NotFoundException("user를 찾지 못했습니다."));
 
@@ -134,10 +151,12 @@ public class CommentService {
 		userService.plusChosenPoint(comment);
 
 		Comment save = commentRepository.save(comment);
+
 		return new CommentResponse(save.getCommentId(), save.getContent(), save.getIsChosen(), save.getCreatedAt(),
 			save.getUpdatedAt(), save.getDiary().getDiaryId(), save.getUser().getId(), save.getNickname(),
-			updateButton(user, comment.getCommentId()), deleteButton(user, diary_id, comment.getCommentId())
-			, chooseButton(user, diary_id));
+			updateButton(user, comment.getCommentId()),
+			deleteButton(user, commentChooseRequest.getDiaryId(), comment.getCommentId())
+			, chooseButton(user, commentChooseRequest.getDiaryId()));
 	}
 
 	@Transactional
@@ -148,7 +167,7 @@ public class CommentService {
 			.orElseThrow(() -> new NotFoundException("comment를 찾지못했습니다."));
 
 		userService.minusCommentPoint(customUserDetails, comment);
-		commentRepository.deleteById(comment_id);
+		commentRepository.deleteByCommentId(comment_id);
 	}
 
 	public boolean updateButton(User user, Long commentId) {

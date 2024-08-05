@@ -3,7 +3,9 @@ package org.example.lionhackaton.controller;
 import java.util.Collections;
 import java.util.List;
 
+import org.example.lionhackaton.domain.dto.request.CommentChooseRequest;
 import org.example.lionhackaton.domain.dto.request.CommentRequest;
+import org.example.lionhackaton.domain.dto.request.CommentUpdateRequest;
 import org.example.lionhackaton.domain.dto.response.CommentResponse;
 import org.example.lionhackaton.domain.oauth.CustomUserDetails;
 import org.example.lionhackaton.service.CommentService;
@@ -77,27 +79,25 @@ public class CommentController {
 		}
 	}
 
-	@PutMapping("/{comment_id}/update")
+	@PutMapping("/update")
 	public ResponseEntity<?> updateComment(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@RequestParam("diary_id") Long diary_id,
-		@PathVariable("comment_id") Long comment_id,
-		@RequestParam("content") String content) {
+		@RequestBody CommentUpdateRequest commentUpdateRequest
+	) {
 		try {
-			CommentResponse updatedComment = commentService.updateComment(customUserDetails, diary_id, comment_id, content);
+			CommentResponse updatedComment = commentService.updateComment(customUserDetails, commentUpdateRequest);
 			return ResponseEntity.status(HttpStatus.OK).body(updatedComment);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
 	}
 
-	@PutMapping("/{comment_id}/choose")
+	@PutMapping("/choose")
 	public ResponseEntity<?> chooseComment(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@PathVariable("comment_id") Long comment_id,
-		@RequestParam("diary_id") Long diary_id) {
+		@RequestBody CommentChooseRequest commentChooseRequest) {
 		try {
-			CommentResponse chooseComment = commentService.chooseComment(customUserDetails, comment_id, diary_id);
+			CommentResponse chooseComment = commentService.chooseComment(customUserDetails, commentChooseRequest);
 			return ResponseEntity.status(HttpStatus.OK).body(chooseComment);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
