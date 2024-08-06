@@ -207,7 +207,7 @@ public class DiaryService {
 				comment.getUser().getId(), comment.getNickname(),
 				commentService.updateButton(user, comment.getCommentId()),
 				commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
-				commentService.chooseButton(user, diary.getDiaryId())))
+				commentService.chooseButton(user, diary.getDiaryId(), comment.getCommentId())))
 			.toList());
 
 		if (list.isEmpty()) {
@@ -254,7 +254,7 @@ public class DiaryService {
 								comment.getUser().getId(), comment.getNickname()
 								, commentService.updateButton(user, comment.getCommentId()),
 								commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
-								commentService.chooseButton(user, diary.getDiaryId())))
+								commentService.chooseButton(user, diary.getDiaryId(), comment.getCommentId())))
 							.toList());
 
 					if (list.isEmpty()) {
@@ -305,7 +305,7 @@ public class DiaryService {
 				comment.getUser().getId(), comment.getNickname(),
 				commentService.updateButton(user, comment.getCommentId()),
 				commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
-				commentService.chooseButton(user, diary.getDiaryId())))
+				commentService.chooseButton(user, diary.getDiaryId(), comment.getCommentId())))
 			.toList());
 
 		return getDiaryResponse(save, list);
@@ -333,7 +333,7 @@ public class DiaryService {
 				comment.getUser().getId(), comment.getNickname(),
 				commentService.updateButton(user, comment.getCommentId()),
 				commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
-				commentService.chooseButton(user, diary.getDiaryId())))
+				commentService.chooseButton(user, diary.getDiaryId(), comment.getCommentId())))
 			.toList();
 
 		return getDiaryResponse(save, list);
@@ -417,7 +417,7 @@ public class DiaryService {
 						comment.getUser().getId(), comment.getNickname(),
 						commentService.updateButton(user, comment.getCommentId()),
 						commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
-						commentService.chooseButton(user, diary.getDiaryId())))
+						commentService.chooseButton(user, diary.getDiaryId(), comment.getCommentId())))
 					.toList());
 
 				if (list.isEmpty()) {
@@ -435,8 +435,8 @@ public class DiaryService {
 					diary.getCreatedAt(),
 					diary.getUpdatedAt(),
 					diary.getIsRepresentative(),
-					diary.getIsFavorite(),
 					diary.getIsShared(),
+					diary.getIsFavorite(),
 					diary.getUser().getId(),
 					list);
 			})
@@ -452,20 +452,25 @@ public class DiaryService {
 		for (Diary diary : sharedDiaries) {
 			List<CommentResponse> list = new ArrayList<>(commentRepository.findByDiary_DiaryId(diary.getDiaryId())
 				.stream()
-				.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(),
+				.map(comment -> new CommentResponse(comment.getCommentId(),
+					comment.getContent(),
 					comment.getIsChosen(),
-					comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-					comment.getUser().getId(), comment.getNickname(),
+					comment.getCreatedAt(),
+					comment.getUpdatedAt(),
+					comment.getDiary().getDiaryId(),
+					comment.getUser().getId(),
+					comment.getNickname(),
 					commentService.updateButton(user, comment.getCommentId()),
 					commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
-					commentService.chooseButton(user, diary.getDiaryId())))
+					commentService.chooseButton(user, diary.getDiaryId(), comment.getCommentId())))
 				.toList());
 
 			if (list.isEmpty()) {
 				list.add(new CommentResponse(null, null, null, null, null, null, null, null, null, null, null));
 			}
 
-			sharedDiariesResponse.add(new DiaryResponse(
+			sharedDiariesResponse.add(
+				new DiaryResponse(
 				diary.getDiaryId(),
 				diary.getDiaryTitle(),
 				diary.getSodaIndex(),
@@ -476,8 +481,8 @@ public class DiaryService {
 				diary.getCreatedAt(),
 				diary.getUpdatedAt(),
 				diary.getIsRepresentative(),
-				diary.getIsFavorite(),
 				diary.getIsShared(),
+				diary.getIsFavorite(),
 				diary.getUser().getId(),
 				list
 			));
@@ -495,13 +500,18 @@ public class DiaryService {
 			.map(diary -> {
 				List<CommentResponse> list = new ArrayList<>(commentRepository.findByDiary_DiaryId(diary.getDiaryId())
 					.stream()
-					.map(comment -> new CommentResponse(comment.getCommentId(), comment.getContent(),
+					.map(comment -> new CommentResponse(
+						comment.getCommentId(),
+						comment.getContent(),
 						comment.getIsChosen(),
-						comment.getCreatedAt(), comment.getUpdatedAt(), comment.getDiary().getDiaryId(),
-						comment.getUser().getId(), comment.getNickname(),
+						comment.getCreatedAt(),
+						comment.getUpdatedAt(),
+						comment.getDiary().getDiaryId(),
+						comment.getUser().getId(),
+						comment.getNickname(),
 						commentService.updateButton(user, comment.getCommentId()),
 						commentService.deleteButton(user, diary.getDiaryId(), comment.getCommentId()),
-						commentService.chooseButton(user, diary.getDiaryId())))
+						commentService.chooseButton(user, diary.getDiaryId(), comment.getCommentId())))
 					.toList());
 
 				if (list.isEmpty()) {
@@ -519,8 +529,8 @@ public class DiaryService {
 					diary.getCreatedAt(),
 					diary.getUpdatedAt(),
 					diary.getIsRepresentative(),
-					diary.getIsFavorite(),
 					diary.getIsShared(),
+					diary.getIsFavorite(),
 					diary.getUser().getId(),
 					list);
 			})

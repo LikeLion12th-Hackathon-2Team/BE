@@ -44,6 +44,7 @@ public class Diary {
 	private Boolean isRepresentative;
 	private Boolean isFavorite = false;
 	private Boolean isShared = false;
+	private Boolean isChosen = false;
 
 	public Diary(String diaryTitle, Long sodaIndex, String content, String purpose, Boolean isRepresentative,
 		Boolean isFavorite, Boolean isShared,LocalDate diaryDate, User user) {
