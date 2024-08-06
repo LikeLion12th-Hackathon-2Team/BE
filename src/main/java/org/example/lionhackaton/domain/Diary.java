@@ -31,7 +31,7 @@ public class Diary {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long diaryId;
 	private String diaryTitle;
-	private Long sodaIndex;
+	private Long sodaIndex = 0L;
 	private String content;
 	private String purpose;
 	private LocalDate diaryDate;

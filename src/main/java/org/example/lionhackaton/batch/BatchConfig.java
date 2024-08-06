@@ -61,6 +61,8 @@ public class BatchConfig {
 	private String model;
 	@Value("${openai.api.url}")
 	private String apiURL;
+	@Value("${openai.secret.key}")
+	private String secret_key;
 
 	@Autowired
 	public BatchConfig(JobRepository jobRepository, PlatformTransactionManager transactionManager,
@@ -171,7 +173,7 @@ public class BatchConfig {
 
 				HttpHeaders headers = new HttpHeaders();
 				headers.setContentType(MediaType.APPLICATION_JSON);
-				headers.set("Authorization", "Bearer " + "sk-None-L1NGcSKoHf6WQyw1rFJoT3BlbkFJXw1grS2f76lqjp5b6ZEJ");
+				headers.set("Authorization", "Bearer " + secret_key);
 
 				HttpEntity<ChatGPTRequest> entity = new HttpEntity<>(chatGPTRequest, headers);
 

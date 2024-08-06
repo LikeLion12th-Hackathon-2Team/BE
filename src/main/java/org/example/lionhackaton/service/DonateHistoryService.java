@@ -28,7 +28,7 @@ public class DonateHistoryService {
 			}
 			user.setPoint(user.getPoint() - donateHistoryRequest.getPoint());
 			DonateHistory donateHistory = new DonateHistory();
-			donateHistory.setPoint(donateHistoryRequest.getPoint());
+			donateHistory.setPoint(donateHistoryRequest.getPoint() / 100);
 			donateHistory.setLocation(donateHistoryRequest.getLocation());
 			donateHistory.setUser(user);
 			userRepository.save(user);

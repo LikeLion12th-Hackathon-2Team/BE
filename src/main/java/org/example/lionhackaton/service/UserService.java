@@ -94,7 +94,7 @@ public class UserService {
 
 		if (todayComments.size() <= 10 && todayComments.contains(comment)) {
 			user.setPoint(user.getPoint() - 10);
-			user.setDailyDiaryCount(user.getDailyCommentCount() + 1);
+			user.setDailyCommentCount(user.getDailyCommentCount() + 1);
 		}
 		if (comment.getIsChosen()) {
 			user.setPoint(user.getPoint() - 30);
