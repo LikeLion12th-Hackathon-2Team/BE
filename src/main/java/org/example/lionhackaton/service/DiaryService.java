@@ -49,7 +49,6 @@ public class DiaryService {
 	@Value("${openai.secret.key}")
 	private String secret_key;
 
-
 	private final CommentRepository commentRepository;
 
 	public DiaryService(RestTemplate template, DiaryRepository diaryRepository, UserRepository userRepository,
@@ -239,8 +238,18 @@ public class DiaryService {
 
 		Diary diary = diaryRepository.findById(id).orElseThrow(() -> new NotFoundException("diary not found"));
 
+		if (diary.getIsRepresentative()) {
+			diaryRepository.deleteByDiaryId(id);
+			List<Diary> allByDiaryDateAndUserId = diaryRepository.findAllByDiaryDateAndUserId(LocalDate.now(),
+				customUserDetails.getId());
+			if (!allByDiaryDateAndUserId.isEmpty()) {
+				allByDiaryDateAndUserId.get(0).setIsRepresentative(true);
+				diaryRepository.save(allByDiaryDateAndUserId.get(0));
+			}
+		} else {
+			diaryRepository.deleteByDiaryId(id);
+		}
 		userService.minusDiaryPoint(customUserDetails, diary);
-		diaryRepository.deleteByDiaryId(id);
 	}
 
 	public List<DiaryResponse> getUserAllDiaries(CustomUserDetails customUserDetails) {
@@ -475,21 +484,21 @@ public class DiaryService {
 
 			sharedDiariesResponse.add(
 				new DiaryResponse(
-				diary.getDiaryId(),
-				diary.getDiaryTitle(),
-				diary.getSodaIndex(),
-				diary.getContent(),
-				diary.getPurpose(),
-				diary.getGptComment(),
-				diary.getDiaryDate(),
-				diary.getCreatedAt(),
-				diary.getUpdatedAt(),
-				diary.getIsRepresentative(),
-				diary.getIsShared(),
-				diary.getIsFavorite(),
-				diary.getUser().getId(),
-				list
-			));
+					diary.getDiaryId(),
+					diary.getDiaryTitle(),
+					diary.getSodaIndex(),
+					diary.getContent(),
+					diary.getPurpose(),
+					diary.getGptComment(),
+					diary.getDiaryDate(),
+					diary.getCreatedAt(),
+					diary.getUpdatedAt(),
+					diary.getIsRepresentative(),
+					diary.getIsShared(),
+					diary.getIsFavorite(),
+					diary.getUser().getId(),
+					list
+				));
 		}
 
 		return sharedDiariesResponse;
